@@ -2,7 +2,7 @@ package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
 import com.example.shop.domain.shop.Item;
-import com.example.shop.dto.instagram.ArticleRequestDto;
+import com.example.shop.dto.instagram.article.ArticleRequestDto;
 import com.example.shop.repository.ArticleRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;

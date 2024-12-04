@@ -1,8 +1,8 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
-import com.example.shop.dto.instagram.ArticleLikeRequestDto;
-import com.example.shop.dto.instagram.CommentLikeRequestDto;
+import com.example.shop.dto.instagram.article.ArticleLikeRequestDto;
+import com.example.shop.dto.instagram.comment.CommentLikeRequestDto;
 import com.example.shop.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

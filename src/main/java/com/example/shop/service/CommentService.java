@@ -1,8 +1,8 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
-import com.example.shop.dto.instagram.CommentRequestDto;
-import com.example.shop.dto.instagram.CommentUpdateRequestDto;
+import com.example.shop.dto.instagram.comment.CommentRequestDto;
+import com.example.shop.dto.instagram.comment.CommentUpdateRequestDto;
 import com.example.shop.repository.CommentRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;

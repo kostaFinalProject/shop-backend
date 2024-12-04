@@ -2,7 +2,7 @@ package com.example.shop.service;
 
 import com.example.shop.domain.instagram.Follower;
 import com.example.shop.domain.instagram.Member;
-import com.example.shop.dto.instagram.FollowerRequestDto;
+import com.example.shop.dto.instagram.follow.FollowerRequestDto;
 import com.example.shop.repository.FollowerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

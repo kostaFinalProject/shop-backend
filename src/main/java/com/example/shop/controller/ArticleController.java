@@ -1,6 +1,6 @@
 package com.example.shop.controller;
 
-import com.example.shop.dto.instagram.ArticleRequestDto;
+import com.example.shop.dto.instagram.article.ArticleRequestDto;
 import com.example.shop.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

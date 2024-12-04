@@ -1,7 +1,7 @@
 package com.example.shop.controller;
 
-import com.example.shop.dto.instagram.CommentRequestDto;
-import com.example.shop.dto.instagram.CommentUpdateRequestDto;
+import com.example.shop.dto.instagram.comment.CommentRequestDto;
+import com.example.shop.dto.instagram.comment.CommentUpdateRequestDto;
 import com.example.shop.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

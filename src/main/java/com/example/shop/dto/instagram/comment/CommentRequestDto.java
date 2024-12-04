@@ -1,4 +1,4 @@
-package com.example.shop.dto.instagram;
+package com.example.shop.dto.instagram.comment;
 
 import lombok.Getter;
 import lombok.Setter;

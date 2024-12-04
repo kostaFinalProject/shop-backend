@@ -3,7 +3,7 @@ package com.example.shop.service;
 import com.example.shop.domain.instagram.Article;
 import com.example.shop.domain.instagram.ArticleCollection;
 import com.example.shop.domain.instagram.Member;
-import com.example.shop.dto.instagram.ArticleCollectionRequestDto;
+import com.example.shop.dto.instagram.article.ArticleCollectionRequestDto;
 import com.example.shop.repository.ArticleCollectionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.example.shop.controller;
 
-import com.example.shop.dto.instagram.FollowerRequestDto;
+import com.example.shop.dto.instagram.follow.FollowerRequestDto;
 import com.example.shop.service.FollowerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

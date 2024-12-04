@@ -1,7 +1,7 @@
 package com.example.shop.controller;
 
-import com.example.shop.dto.instagram.ArticleLikeRequestDto;
-import com.example.shop.dto.instagram.CommentLikeRequestDto;
+import com.example.shop.dto.instagram.article.ArticleLikeRequestDto;
+import com.example.shop.dto.instagram.comment.CommentLikeRequestDto;
 import com.example.shop.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,9 +1,9 @@
-package com.example.shop.dto.instagram;
+package com.example.shop.dto.instagram.article;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class ArticleLikeRequestDto {
+public class ArticleCollectionRequestDto {
     private Long articleId;
 }
