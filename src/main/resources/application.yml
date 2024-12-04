@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: shop
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/shopDB
+    username: root
+    password: root
+
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+    database: mysql
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jhs990313@gmail.com
+    password: zqdogobomffhumms
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+            required: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+  web:
+    resources:
+      static-locations: classpath:/static/, file:/uploads/
+
+#logging:
+#  level:
+#    org.hibernate: DEBUG
+#    com.zaxxer.hikari: DEBUG
+#    com.p6spy: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+  endpoint:
+    health:
+      show-components: always
+
+  server:
+    port: 9292
+
+mail:
+  sender:
+    email: jhs990313@gmail.com
+
+file:
+  upload-dir: C://Users/JungHyunSu/uploads
+
+jwt:
+  secret-key: cu2jh2MCUGC3mLRBGwm6jzKqQR1PRTKc9KOp4ssJGo=
