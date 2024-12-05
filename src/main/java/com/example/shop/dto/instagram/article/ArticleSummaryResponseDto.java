@@ -3,14 +3,11 @@ package com.example.shop.dto.instagram.article;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter @Setter
-public class ArticleDetailResponseDto {
+public class ArticleSummaryResponseDto {
     private Long memberId;
     private String memberName;
-    private List<String> images;
-    private List<String> hashtags;
-    private List<ArticleItemResponseDto> items;
+    private String imageUrl;
+    private String content;
     private long likeCount;
 }

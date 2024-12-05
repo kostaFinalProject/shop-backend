@@ -5,10 +5,17 @@ import com.example.shop.domain.shop.Item;
 import com.example.shop.dto.instagram.article.ArticleDetailResponseDto;
 import com.example.shop.dto.instagram.article.ArticleItemResponseDto;
 import com.example.shop.dto.instagram.article.ArticleRequestDto;
+import com.example.shop.dto.instagram.article.ArticleSummaryResponseDto;
+import com.example.shop.dto.instagram.comment.CommentRequestDto;
+import com.example.shop.dto.instagram.comment.CommentResponseDto;
 import com.example.shop.exception.NotFoundException;
 import com.example.shop.repository.ArticleRepository;
+import com.example.shop.repository.CommentRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,9 +27,11 @@ import java.util.List;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final CommentRepository commentRepository;
     private final ImageService imageService;
     private final ValidationService validationService;
 
+    /** 게시글 생성 */
     @Transactional
     public void saveArticle(Long memberId, ArticleRequestDto dto, List<MultipartFile> articleImages) {
         Member member = validationService.validateMemberById(memberId);
@@ -47,6 +56,23 @@ public class ArticleService {
         articleRepository.save(article);
     }
 
+    /** 게시글 댓글 작성 */
+    @Transactional
+    public void saveComment(Long memberId, Long articleId, CommentRequestDto dto, MultipartFile file) {
+        Member member = validationService.validateMemberById(memberId);
+        Article article = validationService.validateArticleById(articleId);
+
+        CommentImg commentImg = null;
+        if (file != null && !file.isEmpty()) {
+            commentImg = imageService.saveCommentImg(file);
+        }
+
+        Comment comment = Comment.createComment(article, member, dto.getContent(), null, commentImg);
+
+        commentRepository.save(comment);
+    }
+
+    /** 게시글 수정 */
     @Transactional
     public void updateArticle(Long memberId, Long articleId, ArticleRequestDto dto, List<MultipartFile> articleImages) {
 
@@ -82,6 +108,7 @@ public class ArticleService {
         article.updateArticleItems(newItems);
     }
 
+    /** 게시글 단건 조회 */
     @Transactional(readOnly = true)
     public ArticleDetailResponseDto getArticle(Long articleId) {
         Article article = articleRepository.findArticleWithWriterById(articleId)
@@ -117,9 +144,56 @@ public class ArticleService {
                 }).toList();
         dto.setItems(items);
 
+        dto.setLikeCount(article.getLikes());
+
         return dto;
     }
 
+    @Transactional(readOnly = true)
+    public Page<ArticleSummaryResponseDto> getArticles(Pageable pageable) {
+        Page<Article> articles = articleRepository.findAllArticles(pageable);
+
+        List<ArticleSummaryResponseDto> dtos = articles.stream()
+                .map(article -> {
+                    ArticleSummaryResponseDto dto = new ArticleSummaryResponseDto();
+
+                    dto.setMemberId(article.getMember().getId());
+                    dto.setMemberName(article.getMember().getName());
+                    dto.setImageUrl(article.getArticleImages().get(0).getImgUrl());
+                    dto.setContent(article.getContent());
+                    dto.setLikeCount(article.getLikes());
+
+                    return dto;
+                })
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, articles.getTotalElements());
+    }
+
+    /** 게시글 댓글 조회 */
+    @Transactional(readOnly = true)
+    public Page<CommentResponseDto> getComments(Long articleId, Pageable pageable) {
+        Page<Comment> comments = articleRepository.findCommentsByArticleId(articleId, pageable);
+
+        List<CommentResponseDto> dtos = comments.stream()
+                .map(comment -> {
+                    CommentResponseDto dto = new CommentResponseDto();
+
+                    dto.setCommentId(comment.getId());
+                    dto.setMemberName(comment.getMember().getName());
+                    dto.setContent(comment.getContent());
+                    dto.setImageUrl(comment.getCommentImg().getImgUrl());
+                    dto.setLikeCount(comment.getLikes());
+                    dto.setHasReplies(comment.isReplyComments());
+
+                    return dto;
+                })
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, comments.getTotalElements());
+    }
+
+    /** 게시글 활성화 */
     @Transactional
     public void activeArticle(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);
@@ -132,6 +206,7 @@ public class ArticleService {
         article.activeArticle();
     }
 
+    /** 게시글 비활성화 */
     @Transactional
     public void inactiveArticle(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);
@@ -144,6 +219,7 @@ public class ArticleService {
         article.inActiveArticle();
     }
 
+    /** 게시글 삭제 */
     @Transactional
     public void deleteArticle(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);

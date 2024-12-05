@@ -3,12 +3,18 @@ package com.example.shop.service;
 import com.example.shop.domain.instagram.*;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.dto.instagram.comment.CommentUpdateRequestDto;
+import com.example.shop.dto.instagram.comment.ReplyCommentResponseDto;
 import com.example.shop.repository.CommentRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,21 +25,17 @@ public class CommentService {
     private final ValidationService validationService;
 
     @Transactional
-    public void saveComment(Long memberId, CommentRequestDto dto, MultipartFile file) {
+    public void saveReply(Long memberId, Long commentId, CommentRequestDto dto, MultipartFile file) {
         Member member = validationService.validateMemberById(memberId);
-        Article article = validationService.validateArticleById(dto.getArticleId());
-
-        Comment parentComment = null;
-        if (dto.getParentCommentId() != null) {
-            parentComment = validationService.validateCommentById(dto.getParentCommentId());
-        }
+        Comment parentComment = commentRepository.findParentCommentWithArticleByCommentId(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 댓글이 아닙니다."));
 
         CommentImg commentImg = null;
         if (file != null && !file.isEmpty()) {
             commentImg = imageService.saveCommentImg(file);
         }
 
-        Comment comment = Comment.createComment(article, member, dto.getContent(), parentComment, commentImg);
+        Comment comment = Comment.createComment(parentComment.getArticle(), member, dto.getContent(), parentComment, commentImg);
 
         commentRepository.save(comment);
     }
@@ -59,17 +61,24 @@ public class CommentService {
         comment.updateComment(dto.getContent(), commentImg);
     }
 
-    @Transactional
-    public void deleteComment(Long memberId, Long commentId) {
-        Member member = validationService.validateMemberById(memberId);
-        Comment comment = validationService.validateCommentById(commentId);
+    @Transactional(readOnly = true)
+    public Page<ReplyCommentResponseDto> getReplies(Long commentId, Pageable pageable) {
+        Page<Comment> replies = commentRepository.findReplyCommentsByCommentId(commentId, pageable);
 
-        if (member.getGrade() == Grade.USER && !comment.getMember().equals(member)) {
-            throw new IllegalArgumentException("댓글을 삭제할 권한이 없습니다.");
-        }
+        List<ReplyCommentResponseDto> dtos = replies.stream()
+                .map(reply -> {
+                    ReplyCommentResponseDto dto = new ReplyCommentResponseDto();
+                    dto.setCommentId(reply.getId());
+                    dto.setMemberName(reply.getMember().getName());
+                    dto.setContent(reply.getContent());
+                    dto.setImageUrl(reply.getCommentImg().getImgUrl());
+                    dto.setLikeCount(reply.getLikes());
 
-        imageService.deleteCommentImg(comment);
-        comment.deleteComment();
+                    return dto;
+                })
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, replies.getTotalElements());
     }
 
     @Transactional
@@ -94,6 +103,19 @@ public class CommentService {
         }
 
         comment.inactiveComment();
+    }
+
+    @Transactional
+    public void deleteComment(Long memberId, Long commentId) {
+        Member member = validationService.validateMemberById(memberId);
+        Comment comment = validationService.validateCommentById(commentId);
+
+        if (member.getGrade() == Grade.USER && !comment.getMember().equals(member)) {
+            throw new IllegalArgumentException("댓글을 삭제할 권한이 없습니다.");
+        }
+
+        imageService.deleteCommentImg(comment);
+        comment.deleteComment();
     }
 }
 

@@ -110,4 +110,9 @@ public class Comment {
     public void deleteComment() {
         this.commentStatus = CommentStatus.DELETED;
     }
+
+    /** 대댓글 존재 여부 판단 */
+    public boolean isReplyComments() {
+        return !this.comments.isEmpty();
+    }
 }
