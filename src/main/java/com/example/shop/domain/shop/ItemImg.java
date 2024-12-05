@@ -58,13 +58,6 @@ public class ItemImg {
     }
 
     /**
-     * 대표 이미지 수정 메서드
-     */
-    public void updateRepImgYn(String repImgYn) {
-        this.repImgYn = repImgYn;
-    }
-
-    /**
      * 대표 이미지 여부 확인 메서드
      */
     public boolean isRepImgYn() {

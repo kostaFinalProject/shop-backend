@@ -83,8 +83,8 @@ public class Comment {
 
     /** 댓글 수정 - 내용과 이미지 */
     public void updateComment(String newContent, CommentImg newCommentImg) {
-        if (this.commentStatus == CommentStatus.DELETED) {
-            throw new IllegalStateException("삭제된 댓글은 수정할 수 없습니다.");
+        if (this.commentStatus != CommentStatus.ACTIVE) {
+            throw new IllegalStateException("비활성화 된 댓글이나 삭제된 댓글입니다.");
         }
 
         this.content = newContent;

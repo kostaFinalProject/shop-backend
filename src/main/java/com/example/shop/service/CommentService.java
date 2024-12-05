@@ -71,5 +71,29 @@ public class CommentService {
         imageService.deleteCommentImg(comment);
         comment.deleteComment();
     }
+
+    @Transactional
+    public void activateComment(Long memberId, Long commentId) {
+        Member member = validationService.validateMemberById(memberId);
+        Comment comment = validationService.validateCommentById(commentId);
+
+        if (member.getGrade() == Grade.USER) {
+            throw new IllegalArgumentException("댓글을 비활성화할 권한이 없습니다.");
+        }
+
+        comment.activeComment();
+    }
+
+    @Transactional
+    public void inactivateComment(Long memberId, Long commentId) {
+        Member member = validationService.validateMemberById(memberId);
+        Comment comment = validationService.validateCommentById(commentId);
+
+        if (member.getGrade() == Grade.USER) {
+            throw new IllegalArgumentException("댓글을 비활성화할 권한이 없습니다.");
+        }
+
+        comment.inactiveComment();
+    }
 }
 

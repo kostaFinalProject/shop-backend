@@ -130,4 +130,13 @@ public class Item {
     public void deleteItem() {
         this.itemStatus = ItemStatus.DELETED;
     }
+
+    /** 상품의 대표 이미지 가져오기 */
+    public String getRepItemImage() {
+        return this.itemImages.stream()
+                .filter(ItemImg::isRepImgYn)
+                .findFirst()
+                .map(ItemImg::getImgUrl)
+                .orElse(getItemImages().get(0).getImgUrl());
+    }
 }

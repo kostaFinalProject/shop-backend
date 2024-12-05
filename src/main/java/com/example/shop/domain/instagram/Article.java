@@ -88,6 +88,10 @@ public class Article {
     }
 
     public void updateArticleImages(List<ArticleImg> newImages) {
+        if (this.articleStatus != ArticleStatus.ACTIVE) {
+            throw new IllegalStateException("비활성화 된 게시물이나 삭제된 게시물입니다.");
+        }
+
         for (ArticleImg articleImg : new ArrayList<>(this.articleImages)) {
             if (!newImages.contains(articleImg)) {
                 removeArticleImage(articleImg);
@@ -110,6 +114,10 @@ public class Article {
     }
 
     public void updateArticleTags(List<ArticleTag> newTags) {
+        if (this.articleStatus != ArticleStatus.ACTIVE) {
+            throw new IllegalStateException("비활성화 된 게시물이나 삭제된 게시물입니다.");
+        }
+
         for (ArticleTag articleTag : new ArrayList<>(this.articleTags)) {
             if (!newTags.contains(articleTag)) {
                 removeArticleTag(articleTag);
@@ -132,6 +140,10 @@ public class Article {
     }
 
     public void updateArticleItems(List<ArticleItem> newItems) {
+        if (this.articleStatus != ArticleStatus.ACTIVE) {
+            throw new IllegalStateException("비활성화 된 게시물이나 삭제된 게시물입니다.");
+        }
+
         for (ArticleItem articleItem : new ArrayList<>(this.articleItems)) {
             if (!newItems.contains(articleItem)) {
                 removeArticleItem(articleItem);
@@ -150,8 +162,15 @@ public class Article {
         this.likes += likes;
     }
 
+    /** 게시글 활성화 */
+    public void activeArticle() {
+        this.member.setArticles(1);
+        this.articleStatus = ArticleStatus.ACTIVE;
+    }
+
     /** 게시글 비활성화 */
     public void inActiveArticle() {
+        this.member.setArticles(-1);
         this.articleStatus = ArticleStatus.INACTIVE;
     }
 

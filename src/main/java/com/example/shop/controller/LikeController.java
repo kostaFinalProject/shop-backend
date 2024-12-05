@@ -1,7 +1,5 @@
 package com.example.shop.controller;
 
-import com.example.shop.dto.instagram.article.ArticleLikeRequestDto;
-import com.example.shop.dto.instagram.comment.CommentLikeRequestDto;
 import com.example.shop.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,11 +13,11 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping("/{memberId}/articles")
+    @PostMapping("/{memberId}/{articleId}")
     public ResponseEntity<?> toggleArticleLike(@PathVariable("memberId") Long memberId,
-                                               @RequestBody ArticleLikeRequestDto dto) {
+                                               @PathVariable("articleId") Long articleId) {
 
-        boolean toggleArticleLike = likeService.toggleArticleLike(memberId, dto);
+        boolean toggleArticleLike = likeService.toggleArticleLike(memberId, articleId);
         if (toggleArticleLike) {
             return ResponseEntity.status(HttpStatus.OK).body("좋아요 추가");
         } else {
@@ -27,11 +25,11 @@ public class LikeController {
         }
     }
 
-    @PostMapping("/{memberId}/comments")
+    @PostMapping("/{memberId}/{commentId}")
     public ResponseEntity<?> toggleCommentLike(@PathVariable("memberId") Long memberId,
-                                               @RequestBody CommentLikeRequestDto dto) {
+                                               @PathVariable("commentId") Long commentId) {
 
-        boolean toggleCommentLike = likeService.toggleCommentLike(memberId, dto);
+        boolean toggleCommentLike = likeService.toggleCommentLike(memberId, commentId);
         if (toggleCommentLike) {
             return ResponseEntity.status(HttpStatus.OK).body("좋아요 추가");
         } else {

@@ -23,7 +23,12 @@ public class ArticleController {
                                          @RequestPart("files") List<MultipartFile> files) {
 
         articleService.saveArticle(memberId, dto, files);
-        return ResponseEntity.status(HttpStatus.OK).body("게시글이 성공적으로 생성되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body("게시글이 생성되었습니다.");
+    }
+
+    @GetMapping("/{articleId}")
+    public ResponseEntity<?> getArticle(@PathVariable("articleId") Long articleId) {
+        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticle(articleId));
     }
 
     @PutMapping("/{memberId}/{articleId}")
@@ -33,6 +38,30 @@ public class ArticleController {
                                            @RequestPart("files") List<MultipartFile> files) {
 
         articleService.updateArticle(memberId, articleId, dto, files);
-        return ResponseEntity.status(HttpStatus.OK).body("게시글이 성공적으로 수정되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body("게시글이 수정되었습니다.");
+    }
+
+    @PutMapping("/{memberId}/{articleId}/active")
+    public ResponseEntity<?> activeArticle(@PathVariable("memberId") Long memberId,
+                                             @PathVariable("articleId") Long articleId) {
+
+        articleService.activeArticle(memberId, articleId);
+        return ResponseEntity.status(HttpStatus.OK).body("게시글이 활성화 되었습니다.");
+    }
+
+    @PutMapping("/{memberId}/{articleId}/inactive")
+    public ResponseEntity<?> inactiveArticle(@PathVariable("memberId") Long memberId,
+                                             @PathVariable("articleId") Long articleId) {
+
+        articleService.inactiveArticle(memberId, articleId);
+        return ResponseEntity.status(HttpStatus.OK).body("게시글이 비활성화 되었습니다.");
+    }
+
+    @DeleteMapping("/{memberId}/{articleId}")
+    public ResponseEntity<?> deleteArticle(@PathVariable("memberId") Long memberId,
+                                           @PathVariable("articleId") Long articleId) {
+
+        articleService.deleteArticle(memberId, articleId);
+        return ResponseEntity.status(HttpStatus.OK).body("게시글이 삭제되었습니다.");
     }
 }

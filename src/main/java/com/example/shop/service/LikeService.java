@@ -1,8 +1,6 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
-import com.example.shop.dto.instagram.article.ArticleLikeRequestDto;
-import com.example.shop.dto.instagram.comment.CommentLikeRequestDto;
 import com.example.shop.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,10 +17,9 @@ public class LikeService {
     private final ValidationService validationService;
 
     @Transactional
-    public boolean toggleArticleLike(Long memberId, ArticleLikeRequestDto dto) {
+    public boolean toggleArticleLike(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);
-
-        Article article = validationService.validateArticleById(dto.getArticleId());
+        Article article = validationService.validateArticleById(articleId);
 
         Optional<ArticleLike> likeOptional =
                 validationService.validateArticleLikeByArticleAndMember(article, member);
@@ -40,9 +37,9 @@ public class LikeService {
     }
 
     @Transactional
-    public boolean toggleCommentLike(Long memberId, CommentLikeRequestDto dto) {
+    public boolean toggleCommentLike(Long memberId, Long commentId) {
         Member member = validationService.validateMemberById(memberId);
-        Comment comment = validationService.validateCommentById(dto.getCommentId());
+        Comment comment = validationService.validateCommentById(commentId);
 
         Optional<CommentLike> likeOptional = validationService.validateCommentLikeByCommentAndMember(comment, member);
 

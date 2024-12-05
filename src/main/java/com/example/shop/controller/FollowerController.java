@@ -1,6 +1,5 @@
 package com.example.shop.controller;
 
-import com.example.shop.dto.instagram.follow.FollowerRequestDto;
 import com.example.shop.service.FollowerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,17 +13,17 @@ public class FollowerController {
 
     private final FollowerService followerService;
 
-    @PostMapping("/{memberId}")
+    @PostMapping("/{memberId}/{followerId}")
     public ResponseEntity<?> follow(@PathVariable("memberId") Long memberId,
-                                    @RequestBody FollowerRequestDto dto) {
-        followerService.follow(memberId, dto);
+                                    @PathVariable("followerId") Long followerId) {
+        followerService.follow(memberId, followerId);
         return ResponseEntity.status(HttpStatus.OK).body("팔로우");
     }
 
-    @DeleteMapping("/{memberId}")
+    @DeleteMapping("/{memberId}/{followerId}")
     public ResponseEntity<?> unfollow(@PathVariable("memberId") Long memberId,
-                                      @RequestBody FollowerRequestDto dto) {
-        followerService.unfollow(memberId, dto);
+                                      @PathVariable("followerId") Long followerId) {
+        followerService.unfollow(memberId, followerId);
         return ResponseEntity.status(HttpStatus.OK).body("언팔로우");
     }
 }

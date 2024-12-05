@@ -22,7 +22,7 @@ public class CommentController {
                                          @RequestPart("file") MultipartFile file) {
 
         commentService.saveComment(memberId, dto, file);
-        return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 생성되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body("댓글이 생성되었습니다.");
     }
 
     @PutMapping("/{memberId}/{commentId}")
@@ -32,6 +32,30 @@ public class CommentController {
                                            @RequestPart("file") MultipartFile file) {
 
         commentService.updateComment(memberId, commentId, dto, file);
-        return ResponseEntity.status(HttpStatus.OK).body("댓글이 성공적으로 수정되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body("댓글이 수정되었습니다.");
+    }
+
+    @PutMapping("/{memberId}/{commentId}/active")
+    public ResponseEntity<?> activeComment(@PathVariable("memberId") Long memberId,
+                                             @PathVariable("commentId") Long commentId) {
+
+        commentService.activateComment(memberId, commentId);
+        return ResponseEntity.status(HttpStatus.OK).body("댓글이 활성화 되었습니다.");
+    }
+
+    @PutMapping("/{memberId}/{commentId}/inactive")
+    public ResponseEntity<?> inactiveComment(@PathVariable("memberId") Long memberId,
+                                             @PathVariable("commentId") Long commentId) {
+
+        commentService.inactivateComment(memberId, commentId);
+        return ResponseEntity.status(HttpStatus.OK).body("댓글이 비활성화 되었습니다.");
+    }
+
+    @DeleteMapping("/{memberId}/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable("memberId") Long memberId,
+                                           @PathVariable("commentId") Long commentId) {
+
+        commentService.deleteComment(memberId, commentId);
+        return ResponseEntity.status(HttpStatus.OK).body("댓글이 삭제되었습니다.");
     }
 }
