@@ -11,4 +11,5 @@ public interface ArticleRepositoryCustom {
     Optional<Article> findArticleWithWriterById(Long articleId);
     Page<Comment> findCommentsByArticleId(Long articleId, Pageable pageable);
     Page<Article> findAllArticles(Pageable pageable);
+    Optional<Article> validationArticleAndMemberById(Long articleId, Long memberId);
 }

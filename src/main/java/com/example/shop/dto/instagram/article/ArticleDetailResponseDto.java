@@ -13,4 +13,5 @@ public class ArticleDetailResponseDto {
     private List<String> hashtags;
     private List<ArticleItemResponseDto> items;
     private long likeCount;
+    private long commentCount;
 }

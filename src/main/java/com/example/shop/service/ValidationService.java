@@ -93,4 +93,14 @@ public class ValidationService {
     public boolean validateArticleCollectionByArticleAndMember(Member member, Article article) {
         return articleCollectionRepository.existsByMemberAndArticle(member, article);
     }
+
+    public Article validationArticleAndMemberById(Long articleId, Long memberId) {
+        return articleRepository.validationArticleAndMemberById(articleId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 게시글이 없거나 게시글을 작성한 사용자가 아닙니다."));
+    }
+
+    public Comment validationCommentAndMemberById(Long commentId, Long memberId) {
+        return commentRepository.validationCommentAndMemberById(commentId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 댓글이 없거나 댓글을 작성한 사용자가 아닙니다."));
+    }
 }

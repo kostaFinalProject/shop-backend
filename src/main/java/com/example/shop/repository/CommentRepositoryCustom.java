@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface CommentRepositoryCustom {
     Page<Comment> findReplyCommentsByCommentId(Long commentId, Pageable pageable);
     Optional<Comment> findParentCommentWithArticleByCommentId(Long commentId);
+    Optional<Comment> validationCommentAndMemberById(Long commentId, Long memberId);
 }

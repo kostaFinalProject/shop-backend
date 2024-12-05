@@ -36,6 +36,10 @@ public class ArticleService {
     public void saveArticle(Long memberId, ArticleRequestDto dto, List<MultipartFile> articleImages) {
         Member member = validationService.validateMemberById(memberId);
 
+        if (articleImages == null || articleImages.isEmpty() || articleImages.stream().allMatch(MultipartFile::isEmpty)) {
+            throw new IllegalArgumentException("게시글에는 최소 1장의 이미지가 필요합니다.");
+        }
+
         List<ArticleImg> articleImgs = imageService.saveArticleImgs(articleImages);
 
         List<ArticleTag> articleTags = dto.getHashtags().stream()
@@ -64,6 +68,9 @@ public class ArticleService {
 
         CommentImg commentImg = null;
         if (file != null && !file.isEmpty()) {
+            if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+                throw new IllegalArgumentException("댓글에는 글 또는 이미지 중 하나가 반드시 포함되어야 합니다.");
+            }
             commentImg = imageService.saveCommentImg(file);
         }
 
@@ -75,12 +82,13 @@ public class ArticleService {
     /** 게시글 수정 */
     @Transactional
     public void updateArticle(Long memberId, Long articleId, ArticleRequestDto dto, List<MultipartFile> articleImages) {
+        if (articleImages == null || articleImages.isEmpty() || articleImages.stream().allMatch(MultipartFile::isEmpty)) {
+            throw new IllegalArgumentException("게시글에는 최소 1장의 이미지가 필요합니다.");
+        }
 
-        Member member = validationService.validateMemberById(memberId);
+        Article article = validationService.validationArticleAndMemberById(articleId, memberId);
 
-        Article article = validationService.validateArticleById(articleId);
-
-        if (!article.getMember().equals(member)) {
+        if (!article.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("수정할 권한이 없습니다.");
         }
 
@@ -109,7 +117,7 @@ public class ArticleService {
     }
 
     /** 게시글 단건 조회 */
-    @Transactional(readOnly = true)
+    @Transactional
     public ArticleDetailResponseDto getArticle(Long articleId) {
         Article article = articleRepository.findArticleWithWriterById(articleId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 게시글이 아닙니다."));
@@ -117,6 +125,8 @@ public class ArticleService {
         if (article.getArticleStatus() != ArticleStatus.ACTIVE) {
             throw new NotFoundException("비공개 되거나 삭제된 게시글입니다.");
         }
+
+        article.incrementViewCounts();
 
         ArticleDetailResponseDto dto = new ArticleDetailResponseDto();
         dto.setMemberId(article.getMember().getId());
@@ -145,10 +155,12 @@ public class ArticleService {
         dto.setItems(items);
 
         dto.setLikeCount(article.getLikes());
+        dto.setCommentCount(commentRepository.countByArticleId(articleId));
 
         return dto;
     }
 
+    /** 게시글 전체 조회 */
     @Transactional(readOnly = true)
     public Page<ArticleSummaryResponseDto> getArticles(Pageable pageable) {
         Page<Article> articles = articleRepository.findAllArticles(pageable);

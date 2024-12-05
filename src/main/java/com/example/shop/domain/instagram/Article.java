@@ -32,6 +32,8 @@ public class Article {
 
     private long likes;
 
+    private long viewCounts;
+
     @Enumerated(EnumType.STRING)
     private ArticleStatus articleStatus;
 
@@ -48,6 +50,7 @@ public class Article {
         this.articleImages = articleImages;
         this.content = content;
         this.likes = 0;
+        this.viewCounts = 0;
         this.articleStatus = ArticleStatus.ACTIVE;
         this.articleTags = articleTags;
         this.articleItems = articleItems;
@@ -155,6 +158,11 @@ public class Article {
                 articleItem.setArticle(this);
             }
         }
+    }
+
+    /** 게시글 조회수 증가 */
+    public void incrementViewCounts() {
+        this.viewCounts++;
     }
 
     /** 게시글 좋아요 & 취소 */

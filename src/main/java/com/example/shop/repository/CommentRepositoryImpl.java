@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import static com.example.shop.domain.instagram.QArticle.article;
 import static com.example.shop.domain.instagram.QComment.comment;
+import static com.example.shop.domain.instagram.QMember.member;
 
 @RequiredArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositoryCustom {
@@ -53,5 +54,16 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetchOne();
 
         return Optional.ofNullable(parent);
+    }
+
+    @Override
+    public Optional<Comment> validationCommentAndMemberById(Long commentId, Long memberId) {
+        Comment result = queryFactory.selectFrom(comment)
+                .join(comment.member, member).fetchJoin()
+                .where(comment.id.eq(commentId)
+                        .and(comment.member.id.eq(memberId)))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 }

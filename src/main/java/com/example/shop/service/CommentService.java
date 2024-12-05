@@ -32,6 +32,9 @@ public class CommentService {
 
         CommentImg commentImg = null;
         if (file != null && !file.isEmpty()) {
+            if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+                throw new IllegalArgumentException("댓글에는 글 또는 이미지 중 하나가 반드시 포함되어야 합니다.");
+            }
             commentImg = imageService.saveCommentImg(file);
         }
 
@@ -42,15 +45,17 @@ public class CommentService {
 
     @Transactional
     public void updateComment(Long memberId, Long commentId, CommentUpdateRequestDto dto, MultipartFile file) {
-        Member member = validationService.validateMemberById(memberId);
-        Comment comment = validationService.validateCommentById(commentId);
+        Comment comment = validationService.validationCommentAndMemberById(commentId, memberId);
 
-        if (!comment.getMember().equals(member)) {
+        if (!comment.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("수정할 권한이 없습니다.");
         }
 
         CommentImg commentImg = null;
         if (file != null && !file.isEmpty()) {
+            if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+                throw new IllegalArgumentException("댓글에는 글 또는 이미지 중 하나가 반드시 포함되어야 합니다.");
+            }
             commentImg = imageService.updateCommentImg(comment, file);
         } else {
             if (comment.getCommentImg() != null) {
@@ -118,4 +123,3 @@ public class CommentService {
         comment.deleteComment();
     }
 }
-

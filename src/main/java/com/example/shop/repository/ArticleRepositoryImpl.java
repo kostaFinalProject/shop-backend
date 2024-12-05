@@ -64,4 +64,16 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
 
         return PageableExecutionUtils.getPage(articles, pageable, countQuery::fetchOne);
     }
+
+    @Override
+    public Optional<Article> validationArticleAndMemberById(Long articleId, Long memberId) {
+
+        Article result = queryFactory.selectFrom(article)
+                .join(article.member, member).fetchJoin()
+                .where(article.id.eq(articleId)
+                        .and(article.member.id.eq(memberId)))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
 }

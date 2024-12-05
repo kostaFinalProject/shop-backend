@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Spring Security 적용하면 @PathVariable("memberId") 제거
- * 남은 작업: 검색 조건에 따른 게시글 검색 (ex: 태그별, 상품 태그별 등)
+ * 남은 작업: 검색 조건에 따른 게시글 검색 (ex: 태그별, 상품 태그별 등), 게시글 및 댓글 신고
  */
 @RestController
 @RequiredArgsConstructor
