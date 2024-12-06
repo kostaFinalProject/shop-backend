@@ -14,6 +14,10 @@ public class BlockService {
     private final ValidationService validationService;
 
     public void saveBlock(Long fromMemberId, Long toMemberId) {
+        if (fromMemberId.equals(toMemberId)) {
+            throw new IllegalArgumentException("자신을 차단할 수 없습니다.");
+        }
+
         if (validationService.existByFromMemberIdAndToMemberId(fromMemberId, toMemberId)) {
             throw new IllegalArgumentException("이미 차단된 사용자입니다.");
         }
