@@ -4,7 +4,7 @@ import com.example.shop.domain.instagram.*;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.dto.instagram.comment.CommentUpdateRequestDto;
 import com.example.shop.dto.instagram.comment.ReplyCommentResponseDto;
-import com.example.shop.repository.CommentRepository;
+import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,7 +45,7 @@ public class CommentService {
 
     @Transactional
     public void updateComment(Long memberId, Long commentId, CommentUpdateRequestDto dto, MultipartFile file) {
-        Comment comment = validationService.validationCommentAndMemberById(commentId, memberId);
+        Comment comment = validationService.validateCommentAndMemberById(commentId, memberId);
 
         if (!comment.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("수정할 권한이 없습니다.");
@@ -67,19 +67,16 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ReplyCommentResponseDto> getReplies(Long commentId, Pageable pageable) {
+    public Page<ReplyCommentResponseDto> getReplies(Long memberId, Long commentId, Pageable pageable) {
         Page<Comment> replies = commentRepository.findReplyCommentsByCommentId(commentId, pageable);
 
         List<ReplyCommentResponseDto> dtos = replies.stream()
                 .map(reply -> {
-                    ReplyCommentResponseDto dto = new ReplyCommentResponseDto();
-                    dto.setCommentId(reply.getId());
-                    dto.setMemberName(reply.getMember().getName());
-                    dto.setContent(reply.getContent());
-                    dto.setImageUrl(reply.getCommentImg().getImgUrl());
-                    dto.setLikeCount(reply.getLikes());
+                    boolean like = validationService.existCommentLikeByCommentIdAndMemberId(reply.getId(), memberId);
+                    Long likeId = validationService.findCommentLikeIdByCommentAndMember(reply.getId(), memberId);
 
-                    return dto;
+                    return ReplyCommentResponseDto.createDto(reply.getId(), reply.getMember().getName(),
+                            reply.getContent(), reply.getCommentImg().getImgUrl(), reply.getLikes(), like, likeId);
                 })
                 .toList();
 

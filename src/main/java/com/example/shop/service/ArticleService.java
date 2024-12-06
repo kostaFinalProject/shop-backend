@@ -9,8 +9,8 @@ import com.example.shop.dto.instagram.article.ArticleSummaryResponseDto;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.dto.instagram.comment.CommentResponseDto;
 import com.example.shop.exception.NotFoundException;
-import com.example.shop.repository.ArticleRepository;
-import com.example.shop.repository.CommentRepository;
+import com.example.shop.repository.article.ArticleRepository;
+import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -86,7 +86,7 @@ public class ArticleService {
             throw new IllegalArgumentException("게시글에는 최소 1장의 이미지가 필요합니다.");
         }
 
-        Article article = validationService.validationArticleAndMemberById(articleId, memberId);
+        Article article = validationService.validateArticleAndMemberById(articleId, memberId);
 
         if (!article.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("수정할 권한이 없습니다.");
@@ -118,7 +118,7 @@ public class ArticleService {
 
     /** 게시글 단건 조회 */
     @Transactional
-    public ArticleDetailResponseDto getArticle(Long articleId) {
+    public ArticleDetailResponseDto getArticle(Long memberId, Long articleId) {
         Article article = articleRepository.findArticleWithWriterById(articleId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 게시글이 아닙니다."));
 
@@ -128,54 +128,39 @@ public class ArticleService {
 
         article.incrementViewCounts();
 
-        ArticleDetailResponseDto dto = new ArticleDetailResponseDto();
-        dto.setMemberId(article.getMember().getId());
-        dto.setMemberName(article.getMember().getName());
-
         List<String> articleImages = article.getArticleImages().stream()
                 .map(ArticleImg::getImgUrl)
                 .toList();
-        dto.setImages(articleImages);
 
         List<String> hashTags = article.getArticleTags().stream()
                 .map(articleTag -> articleTag.getTag().getTag())
                 .toList();
-        dto.setHashtags(hashTags);
 
         List<ArticleItemResponseDto> items = article.getArticleItems().stream()
-                .map(articleItem -> {
-                    ArticleItemResponseDto itemDto = new ArticleItemResponseDto();
-                    itemDto.setItemId(articleItem.getItem().getId());
-                    itemDto.setItemName(articleItem.getItem().getName());
-                    itemDto.setPrice(articleItem.getItem().getPrice());
-                    itemDto.setImageUrl(articleItem.getItem().getRepItemImage());
+                .map(articleItem -> ArticleItemResponseDto.createDto(articleItem.getItem().getId(), articleItem.getItem().getName(),
+                        articleItem.getItem().getPrice(), articleItem.getItem().getRepItemImage())).toList();
 
-                    return itemDto;
-                }).toList();
-        dto.setItems(items);
+        long articleCommentsCount = commentRepository.countByArticleId(articleId);
+        boolean liked = validationService.existArticleLikeByArticleIdAndMemberId(articleId, memberId);
+        Long likeId = validationService.findArticleLikeIdByArticleAndMember(articleId, memberId);
 
-        dto.setLikeCount(article.getLikes());
-        dto.setCommentCount(commentRepository.countByArticleId(articleId));
-
-        return dto;
+        return ArticleDetailResponseDto.createDto(articleId, article.getMember().getId(), article.getMember().getName(),
+                articleImages, hashTags, items, article.getLikes(), articleCommentsCount, liked, likeId);
     }
 
     /** 게시글 전체 조회 */
     @Transactional(readOnly = true)
-    public Page<ArticleSummaryResponseDto> getArticles(Pageable pageable) {
+    public Page<ArticleSummaryResponseDto> getArticles(Long memberId, Pageable pageable) {
         Page<Article> articles = articleRepository.findAllArticles(pageable);
 
         List<ArticleSummaryResponseDto> dtos = articles.stream()
                 .map(article -> {
-                    ArticleSummaryResponseDto dto = new ArticleSummaryResponseDto();
+                    boolean liked = validationService.existArticleLikeByArticleIdAndMemberId(article.getId(), memberId);
+                    Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), memberId);
 
-                    dto.setMemberId(article.getMember().getId());
-                    dto.setMemberName(article.getMember().getName());
-                    dto.setImageUrl(article.getArticleImages().get(0).getImgUrl());
-                    dto.setContent(article.getContent());
-                    dto.setLikeCount(article.getLikes());
-
-                    return dto;
+                    return ArticleSummaryResponseDto.createDto(article.getId(), article.getMember().getId(),
+                            article.getMember().getName(), article.getArticleImages().get(0).getImgUrl(),
+                            article.getContent(), article.getLikes(), article.getViewCounts(), liked, likeId);
                 })
                 .toList();
 
@@ -184,21 +169,15 @@ public class ArticleService {
 
     /** 게시글 댓글 조회 */
     @Transactional(readOnly = true)
-    public Page<CommentResponseDto> getComments(Long articleId, Pageable pageable) {
+    public Page<CommentResponseDto> getComments(Long memberId, Long articleId, Pageable pageable) {
         Page<Comment> comments = articleRepository.findCommentsByArticleId(articleId, pageable);
 
         List<CommentResponseDto> dtos = comments.stream()
                 .map(comment -> {
-                    CommentResponseDto dto = new CommentResponseDto();
-
-                    dto.setCommentId(comment.getId());
-                    dto.setMemberName(comment.getMember().getName());
-                    dto.setContent(comment.getContent());
-                    dto.setImageUrl(comment.getCommentImg().getImgUrl());
-                    dto.setLikeCount(comment.getLikes());
-                    dto.setHasReplies(comment.isReplyComments());
-
-                    return dto;
+                    boolean liked = validationService.existCommentLikeByCommentIdAndMemberId(comment.getId(), memberId);
+                    Long likeId = validationService.findCommentLikeIdByCommentAndMember(comment.getId(), memberId);
+                    return CommentResponseDto.createDto(comment.getId(), comment.getMember().getName(), comment.getContent(),
+                            comment.getCommentImg().getImgUrl(), comment.getLikes(), comment.isReplyComments(), liked, likeId);
                 })
                 .toList();
 

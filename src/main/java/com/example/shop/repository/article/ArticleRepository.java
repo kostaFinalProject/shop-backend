@@ -1,4 +1,4 @@
-package com.example.shop.repository;
+package com.example.shop.repository.article;
 
 import com.example.shop.domain.instagram.Article;
 import org.springframework.data.jpa.repository.JpaRepository;

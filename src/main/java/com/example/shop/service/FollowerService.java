@@ -2,7 +2,7 @@ package com.example.shop.service;
 
 import com.example.shop.domain.instagram.Follower;
 import com.example.shop.domain.instagram.Member;
-import com.example.shop.repository.FollowerRepository;
+import com.example.shop.repository.follower.FollowerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,16 +29,10 @@ public class FollowerService {
     }
 
     @Transactional
-    public void unfollow(Long memberId, Long followerId) {
-        if (memberId.equals(followerId)) {
-            throw new IllegalArgumentException("자기 자신은 팔로우를 할 수 없습니다.");
-        }
+    public void unfollow(Long followId) {
+        Follower follower = validationService.validateFollowerById(followId);
 
-        Member followeeMember = validationService.validateMemberById(memberId);
-        Member followerMember = validationService.validateMemberById(followerId);
-
-        Follower follower = validationService.validateFollowerByFolloweeAndFollower(followeeMember, followerMember);
-        follower.cancelFollower(followeeMember, followerMember);
+        follower.cancelFollower(follower.getFollowee(), follower.getFollower());
 
         followerRepository.delete(follower);
     }

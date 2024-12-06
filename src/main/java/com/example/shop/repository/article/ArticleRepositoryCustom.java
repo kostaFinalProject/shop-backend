@@ -1,4 +1,4 @@
-package com.example.shop.repository;
+package com.example.shop.repository.article;
 
 import com.example.shop.domain.instagram.Article;
 import com.example.shop.domain.instagram.Comment;
@@ -11,5 +11,5 @@ public interface ArticleRepositoryCustom {
     Optional<Article> findArticleWithWriterById(Long articleId);
     Page<Comment> findCommentsByArticleId(Long articleId, Pageable pageable);
     Page<Article> findAllArticles(Pageable pageable);
-    Optional<Article> validationArticleAndMemberById(Long articleId, Long memberId);
+    Optional<Article> validateArticleAndMemberById(Long articleId, Long memberId);
 }

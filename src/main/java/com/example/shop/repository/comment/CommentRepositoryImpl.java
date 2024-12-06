@@ -1,4 +1,4 @@
-package com.example.shop.repository;
+package com.example.shop.repository.comment;
 
 import com.example.shop.domain.instagram.Comment;
 import com.example.shop.domain.instagram.CommentStatus;
@@ -57,7 +57,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     @Override
-    public Optional<Comment> validationCommentAndMemberById(Long commentId, Long memberId) {
+    public Optional<Comment> validateCommentAndMemberById(Long commentId, Long memberId) {
         Comment result = queryFactory.selectFrom(comment)
                 .join(comment.member, member).fetchJoin()
                 .where(comment.id.eq(commentId)

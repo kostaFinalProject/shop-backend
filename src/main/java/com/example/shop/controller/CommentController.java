@@ -33,13 +33,14 @@ public class CommentController {
     }
 
     /** 대댓글 전체 조회 (페이징 적용) */
-    @GetMapping("/{commentId}")
-    public ResponseEntity<?> getReplies(@PathVariable("commentId") Long commentId,
+    @GetMapping("/{memberId}/{commentId}")
+    public ResponseEntity<?> getReplies(@PathVariable("memberId") Long memberId,
+                                        @PathVariable("commentId") Long commentId,
                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                         @RequestParam(value = "size", defaultValue = "5") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.getReplies(commentId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getReplies(memberId, commentId, pageable));
     }
 
     /** 댓글 및 대댓글 수정 (작성자 or 관리자만 가능) */

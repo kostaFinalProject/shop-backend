@@ -1,12 +1,11 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
-import com.example.shop.repository.*;
+import com.example.shop.repository.articlelike.ArticleLikeRepository;
+import com.example.shop.repository.commentlike.CommentLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,41 +16,42 @@ public class LikeService {
     private final ValidationService validationService;
 
     @Transactional
-    public boolean toggleArticleLike(Long memberId, Long articleId) {
+    public void saveArticleLike(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);
         Article article = validationService.validateArticleById(articleId);
 
-        Optional<ArticleLike> likeOptional =
-                validationService.validateArticleLikeByArticleAndMember(article, member);
-
-        if (likeOptional.isPresent()) {
-            ArticleLike articleLike = likeOptional.get();
-            articleLike.cancelLike();
-            articleLikeRepository.delete(articleLike);
-            return false;
-        } else {
-            ArticleLike articleLike = ArticleLike.createArticleLike(member, article);
-            articleLikeRepository.save(articleLike);
-            return true;
+        if (validationService.existArticleLikeByArticleIdAndMemberId(articleId, memberId)) {
+            throw new IllegalArgumentException("이미 좋아요를 누른 게시물입니다.");
         }
+
+        ArticleLike articleLike = ArticleLike.createArticleLike(member, article);
+        articleLikeRepository.save(articleLike);
     }
 
     @Transactional
-    public boolean toggleCommentLike(Long memberId, Long commentId) {
+    public void saveCommentLike(Long memberId, Long commentId) {
         Member member = validationService.validateMemberById(memberId);
         Comment comment = validationService.validateCommentById(commentId);
 
-        Optional<CommentLike> likeOptional = validationService.validateCommentLikeByCommentAndMember(comment, member);
-
-        if (likeOptional.isPresent()) {
-            CommentLike commentLike = likeOptional.get();
-            commentLike.cancelLike();
-            commentLikeRepository.delete(commentLike);
-            return false;
-        } else {
-            CommentLike commentLike = CommentLike.createCommentLike(member, comment);
-            commentLikeRepository.save(commentLike);
-            return true;
+        if (validationService.existCommentLikeByCommentIdAndMemberId(commentId, memberId)) {
+            throw new IllegalArgumentException("이미 좋아요를 누른 댓글입니다.");
         }
+
+        CommentLike commentLike = CommentLike.createCommentLike(member, comment);
+        commentLikeRepository.save(commentLike);
+    }
+
+    @Transactional
+    public void deleteArticleLike(Long articleLikeId) {
+        ArticleLike articleLike = validationService.findArticleLikeWithArticleAndMember(articleLikeId);
+        articleLike.cancelLike();
+        articleLikeRepository.delete(articleLike);
+    }
+
+    @Transactional
+    public void deleteCommentLike(Long commentLikeId) {
+        CommentLike commentLike = validationService.findCommentLikeWithCommentAndMemberById(commentLikeId);
+        commentLike.cancelLike();
+        commentLikeRepository.delete(commentLike);
     }
 }

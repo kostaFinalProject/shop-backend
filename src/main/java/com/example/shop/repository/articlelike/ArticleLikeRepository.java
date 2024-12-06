@@ -1,4 +1,4 @@
-package com.example.shop.repository;
+package com.example.shop.repository.articlelike;
 
 import com.example.shop.domain.instagram.Article;
 import com.example.shop.domain.instagram.ArticleLike;
@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface ArticleLikeRepository extends JpaRepository<ArticleLike, Long> {
+public interface ArticleLikeRepository extends JpaRepository<ArticleLike, Long> ,ArticleLikeRepositoryCustom {
     Optional<ArticleLike> findByArticleAndMember(Article article, Member member);
 }

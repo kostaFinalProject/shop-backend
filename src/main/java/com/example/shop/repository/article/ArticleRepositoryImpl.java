@@ -1,4 +1,4 @@
-package com.example.shop.repository;
+package com.example.shop.repository.article;
 
 import com.example.shop.domain.instagram.*;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -66,7 +66,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
     }
 
     @Override
-    public Optional<Article> validationArticleAndMemberById(Long articleId, Long memberId) {
+    public Optional<Article> validateArticleAndMemberById(Long articleId, Long memberId) {
 
         Article result = queryFactory.selectFrom(article)
                 .join(article.member, member).fetchJoin()

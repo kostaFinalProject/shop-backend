@@ -45,28 +45,31 @@ public class ArticleController {
     }
 
     /** 게시글 전체 조회 */
-    @GetMapping
-    public ResponseEntity<?> getArticles(@RequestParam(value = "page", defaultValue = "0") int page,
+    @GetMapping("/{memberId}")
+    public ResponseEntity<?> getArticles(@PathVariable("memberId") Long memberId,
+                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                          @RequestParam(value = "size", defaultValue = "15") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, pageable));
     }
 
     /** 게시글 단건 조회 */
-    @GetMapping("/{articleId}")
-    public ResponseEntity<?> getArticle(@PathVariable("articleId") Long articleId) {
-        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticle(articleId));
+    @GetMapping("/{memberId}/{articleId}")
+    public ResponseEntity<?> getArticle(@PathVariable("memberId") Long memberId,
+                                        @PathVariable("articleId") Long articleId) {
+        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticle(memberId, articleId));
     }
 
     /** 게시글 댓글 조회 */
-    @GetMapping("/{articleId}/comments")
-    public ResponseEntity<?> getArticleComments(@PathVariable("articleId") Long articleId,
+    @GetMapping("/{memberId}/{articleId}/comments")
+    public ResponseEntity<?> getArticleComments(@PathVariable("memberId") Long memberId,
+                                                @PathVariable("articleId") Long articleId,
                                                 @RequestParam(value = "page", defaultValue = "0") int page,
                                                 @RequestParam(value = "size", defaultValue = "20") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(articleService.getComments(articleId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(articleService.getComments(memberId, articleId, pageable));
     }
 
     /** 게시글 수정 (작성자 & 관리자 등급만 가능) */

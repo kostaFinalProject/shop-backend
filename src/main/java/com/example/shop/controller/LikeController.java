@@ -6,6 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Spring Security 적용하면 @PathVariable("memberId") 제거
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/likes")
@@ -13,27 +16,30 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping("/{memberId}/{articleId}")
-    public ResponseEntity<?> toggleArticleLike(@PathVariable("memberId") Long memberId,
-                                               @PathVariable("articleId") Long articleId) {
-
-        boolean toggleArticleLike = likeService.toggleArticleLike(memberId, articleId);
-        if (toggleArticleLike) {
-            return ResponseEntity.status(HttpStatus.OK).body("좋아요 추가");
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body("좋아요 취소");
-        }
+    @PostMapping("/articles/{memberId}/{articleId}")
+    public ResponseEntity<?> saveArticleLike(@PathVariable("memberId") Long memberId,
+                                             @PathVariable("articleId") Long articleId) {
+        likeService.saveArticleLike(memberId, articleId);
+        return ResponseEntity.status(HttpStatus.OK).body("좋아요를 눌렀습니다.");
     }
 
-    @PostMapping("/{memberId}/{commentId}")
-    public ResponseEntity<?> toggleCommentLike(@PathVariable("memberId") Long memberId,
-                                               @PathVariable("commentId") Long commentId) {
+    @PostMapping("/comments/{memberId}/{commentId}")
+    public ResponseEntity<?> saveCommentLike(@PathVariable("memberId") Long memberId,
+                                             @PathVariable("commentId") Long commentId) {
 
-        boolean toggleCommentLike = likeService.toggleCommentLike(memberId, commentId);
-        if (toggleCommentLike) {
-            return ResponseEntity.status(HttpStatus.OK).body("좋아요 추가");
-        } else {
-            return ResponseEntity.status(HttpStatus.OK).body("좋아요 취소");
-        }
+        likeService.saveCommentLike(memberId, commentId);
+        return ResponseEntity.status(HttpStatus.OK).body("좋아요를 눌렀습니다.");
+    }
+
+    @DeleteMapping("/articles/{articleLikeId}")
+    public ResponseEntity<?> deleteArticleLike(@PathVariable("articleLikeId") Long articleLikeId) {
+        likeService.deleteArticleLike(articleLikeId);
+        return ResponseEntity.status(HttpStatus.OK).body("좋아요를 취소했습니다.");
+    }
+
+    @DeleteMapping("/comments/{commentLikeId}")
+    public ResponseEntity<?> deleteCommentLike(@PathVariable("commentLikeId") Long commentLikeId) {
+        likeService.deleteCommentLike(commentLikeId);
+        return ResponseEntity.status(HttpStatus.OK).body("좋아요를 취소했습니다.");
     }
 }
