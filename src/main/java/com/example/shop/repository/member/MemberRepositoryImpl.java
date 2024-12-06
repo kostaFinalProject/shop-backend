@@ -12,6 +12,7 @@ import java.util.List;
 
 import static com.example.shop.domain.instagram.QArticle.article;
 import static com.example.shop.domain.instagram.QArticleCollection.articleCollection;
+import static com.example.shop.domain.instagram.QBlock.block;
 import static com.example.shop.domain.instagram.QFollower.follower1;
 import static com.example.shop.domain.instagram.QMember.member;
 
@@ -85,5 +86,27 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .where(follower1.followee.id.eq(memberId));
 
         return PageableExecutionUtils.getPage(followerList, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<Block> findBlockByMemberId(Long memberId, Pageable pageable) {
+
+        QMember fromMember = new QMember("fromMember");
+        QMember toMember = new QMember("toMember");
+
+        List<Block> blockList = queryFactory.selectFrom(block)
+                .join(block.fromMember, fromMember).fetchJoin()
+                .join(block.toMember, toMember).fetchJoin()
+                .where(block.fromMember.id.eq(memberId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(block.count())
+                .from(block)
+                .where(block.fromMember.id.eq(memberId));
+
+        return PageableExecutionUtils.getPage(blockList, pageable, countQuery::fetchOne);
     }
 }

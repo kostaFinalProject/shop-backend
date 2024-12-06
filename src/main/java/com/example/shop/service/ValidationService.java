@@ -7,14 +7,13 @@ import com.example.shop.domain.shop.Size;
 import com.example.shop.repository.*;
 import com.example.shop.repository.article.ArticleRepository;
 import com.example.shop.repository.articlelike.ArticleLikeRepository;
+import com.example.shop.repository.block.BlockRepository;
 import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.repository.commentlike.CommentLikeRepository;
 import com.example.shop.repository.follower.FollowerRepository;
 import com.example.shop.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * 각종 엔티티 검증 서비스
@@ -34,6 +33,7 @@ public class ValidationService {
     private final ArticleLikeRepository articleLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final ArticleCollectionRepository articleCollectionRepository;
+    private final BlockRepository blockRepository;
 
     public Member validateMemberById(Long memberId) {
         return memberRepository.findById(memberId)
@@ -88,14 +88,6 @@ public class ValidationService {
                 .orElseThrow(() -> new IllegalArgumentException("유효한 팔로우 관계가 아닙니다."));
     }
 
-    public Optional<ArticleLike> validateArticleLikeByArticleAndMember(Article article, Member member) {
-        return articleLikeRepository.findByArticleAndMember(article, member);
-    }
-
-    public Optional<CommentLike> validateCommentLikeByCommentAndMember(Comment comment, Member member) {
-        return commentLikeRepository.findByCommentAndMember(comment, member);
-    }
-
     public boolean validateArticleCollectionByArticleAndMember(Member member, Article article) {
         return articleCollectionRepository.existsByMemberAndArticle(member, article);
     }
@@ -139,5 +131,14 @@ public class ValidationService {
     public CommentLike findCommentLikeWithCommentAndMemberById(Long commentLikeId) {
         return commentLikeRepository.findCommentLikeWithCommentAndMemberById(commentLikeId)
                 .orElseThrow(() -> new IllegalArgumentException("좋아요를 누르지 않은 댓글입니다."));
+    }
+
+    public boolean existByFromMemberIdAndToMemberId(Long fromMemberId, Long toMemberId) {
+        return blockRepository.existByFromMemberIdAndToMemberId(fromMemberId, toMemberId);
+    }
+
+    public Block findBlockWithFromMemberAndToMemberById(Long blockId) {
+        return blockRepository.findBlockWithFromMemberAndToMemberById(blockId)
+                .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 차단 정보입니다."));
     }
 }

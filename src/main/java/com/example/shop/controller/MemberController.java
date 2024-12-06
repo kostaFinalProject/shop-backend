@@ -54,4 +54,14 @@ public class MemberController {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getFollower(memberId, pageable));
     }
+
+    /** 회원의 차단 리스트 조회 */
+    @GetMapping("/{memberId}/blocks")
+    public ResponseEntity<?> getMemberBlockList(@PathVariable("memberId") Long memberId,
+                                                @RequestParam(value = "page", defaultValue = "0") int page,
+                                                @RequestParam(value = "size", defaultValue = "30") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getBlockList(memberId, pageable));
+    }
 }

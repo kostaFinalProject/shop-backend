@@ -1,12 +1,10 @@
 package com.example.shop.service;
 
-import com.example.shop.domain.instagram.Article;
-import com.example.shop.domain.instagram.ArticleCollection;
-import com.example.shop.domain.instagram.Follower;
-import com.example.shop.domain.instagram.Member;
+import com.example.shop.domain.instagram.*;
 import com.example.shop.dto.MemberFormDto;
 import com.example.shop.dto.member.ArticleCollectionResponseDto;
 import com.example.shop.dto.instagram.article.ArticleSummaryResponseDto;
+import com.example.shop.dto.member.BlockResponseDto;
 import com.example.shop.dto.member.FollowerListResponseDto;
 import com.example.shop.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -85,5 +83,17 @@ public class MemberService {
                 .toList();
 
         return new PageImpl<>(dtos, pageable, followers.getTotalElements());
+    }
+
+    /** 회원의 차단 리스트 조회 */
+    public Page<BlockResponseDto> getBlockList(Long memberId, Pageable pageable) {
+
+        Page<Block> blocks = memberRepository.findBlockByMemberId(memberId, pageable);
+
+        List<BlockResponseDto> dtos = blocks.stream()
+                .map(block -> BlockResponseDto.createDto(block.getId(), block.getToMember().getId(), block.getToMember().getName()))
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, blocks.getTotalElements());
     }
 }
