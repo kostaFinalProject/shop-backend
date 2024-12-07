@@ -17,16 +17,14 @@ public class ArticleDetailResponseDto {
     private List<ArticleItemResponseDto> items;
     private long likeCount;
     private long commentCount;
-    private boolean liked;
     private Long likeId;
 
     public static ArticleDetailResponseDto createDto(Long articleId, Long memberId, String memberName,
                                                      List<String> images, List<String> hashtags, List<ArticleItemResponseDto> items,
-                                                     long likeCount, long commentCount, boolean liked, Long likeId) {
+                                                     long likeCount, long commentCount, Long likeId) {
 
         return ArticleDetailResponseDto.builder().articleId(articleId).memberId(memberId).memberName(memberName)
                 .images(images).hashtags(hashtags).items(items)
-                .likeCount(likeCount).commentCount(commentCount)
-                .liked(liked).likeId(likeId).build();
+                .likeCount(likeCount).commentCount(commentCount).likeId(likeId).build();
     }
 }

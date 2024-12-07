@@ -119,8 +119,8 @@ public class ArticleService {
     /** 게시글 단건 조회 */
     @Transactional
     public ArticleDetailResponseDto getArticle(Long memberId, Long articleId) {
-        Article article = articleRepository.findArticleWithWriterById(articleId)
-                .orElseThrow(() -> new IllegalArgumentException("등록된 게시글이 아닙니다."));
+        Article article = articleRepository.findArticleWithWriterById(memberId, articleId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 게시글이 아니거나 차단된 게시글입니다."));
 
         if (article.getArticleStatus() != ArticleStatus.ACTIVE) {
             throw new NotFoundException("비공개 되거나 삭제된 게시글입니다.");
@@ -141,26 +141,24 @@ public class ArticleService {
                         articleItem.getItem().getPrice(), articleItem.getItem().getRepItemImage())).toList();
 
         long articleCommentsCount = commentRepository.countByArticleId(articleId);
-        boolean liked = validationService.existArticleLikeByArticleIdAndMemberId(articleId, memberId);
         Long likeId = validationService.findArticleLikeIdByArticleAndMember(articleId, memberId);
 
         return ArticleDetailResponseDto.createDto(articleId, article.getMember().getId(), article.getMember().getName(),
-                articleImages, hashTags, items, article.getLikes(), articleCommentsCount, liked, likeId);
+                articleImages, hashTags, items, article.getLikes(), articleCommentsCount, likeId);
     }
 
     /** 게시글 전체 조회 */
     @Transactional(readOnly = true)
     public Page<ArticleSummaryResponseDto> getArticles(Long memberId, Pageable pageable) {
-        Page<Article> articles = articleRepository.findAllArticles(pageable);
+        Page<Article> articles = articleRepository.findAllArticles(memberId, pageable);
 
         List<ArticleSummaryResponseDto> dtos = articles.stream()
                 .map(article -> {
-                    boolean liked = validationService.existArticleLikeByArticleIdAndMemberId(article.getId(), memberId);
                     Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), memberId);
 
                     return ArticleSummaryResponseDto.createDto(article.getId(), article.getMember().getId(),
                             article.getMember().getName(), article.getArticleImages().get(0).getImgUrl(),
-                            article.getContent(), article.getLikes(), article.getViewCounts(), liked, likeId);
+                            article.getContent(), article.getLikes(), article.getViewCounts(),likeId);
                 })
                 .toList();
 
@@ -174,10 +172,9 @@ public class ArticleService {
 
         List<CommentResponseDto> dtos = comments.stream()
                 .map(comment -> {
-                    boolean liked = validationService.existCommentLikeByCommentIdAndMemberId(comment.getId(), memberId);
                     Long likeId = validationService.findCommentLikeIdByCommentAndMember(comment.getId(), memberId);
                     return CommentResponseDto.createDto(comment.getId(), comment.getMember().getName(), comment.getContent(),
-                            comment.getCommentImg().getImgUrl(), comment.getLikes(), comment.isReplyComments(), liked, likeId);
+                            comment.getCommentImg().getImgUrl(), comment.getLikes(), comment.isReplyComments(), likeId);
                 })
                 .toList();
 

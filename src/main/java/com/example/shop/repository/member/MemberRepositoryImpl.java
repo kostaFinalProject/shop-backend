@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.example.shop.domain.instagram.QArticle.article;
 import static com.example.shop.domain.instagram.QArticleCollection.articleCollection;
@@ -22,13 +23,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Article> findArticleByMemberId(Long memberId, Pageable pageable) {
+    public Page<Article> findArticleByMemberId(Long memberId, Long fromMemberId, Pageable pageable) {
+
+        List<Long> excludeMembersId = getExcludedMemberIds(fromMemberId);
 
         List<Article> articles = queryFactory.selectFrom(article)
                 .join(article.member, member).fetchJoin()
-                .where(article.member.id.eq(memberId).and(
-                        article.articleStatus.eq(ArticleStatus.ACTIVE)
-                ))
+                .where(article.member.id.eq(memberId)
+                        .and(article.articleStatus.eq(ArticleStatus.ACTIVE)
+                                .and(article.member.id.notIn(excludeMembersId))))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -36,9 +39,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(article.count())
                 .from(article)
-                .where(article.member.id.eq(memberId).and(
-                        article.articleStatus.eq(ArticleStatus.ACTIVE)
-                ));
+                .where(article.member.id.eq(memberId)
+                        .and(article.articleStatus.eq(ArticleStatus.ACTIVE)
+                                .and(article.member.id.notIn(excludeMembersId))));
 
         return PageableExecutionUtils.getPage(articles, pageable, countQuery::fetchOne);
     }
@@ -46,12 +49,14 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     @Override
     public Page<ArticleCollection> findArticleCollectionByMemberId(Long memberId, Pageable pageable) {
 
+        List<Long> excludeMembersId = getExcludedMemberIds(memberId);
+
         List<ArticleCollection> articleCollections = queryFactory.selectFrom(articleCollection)
                 .join(articleCollection.member, member).fetchJoin()
                 .join(articleCollection.article, article).fetchJoin()
-                .where(articleCollection.member.id.eq(memberId).and(
-                        articleCollection.article.articleStatus.eq(ArticleStatus.ACTIVE)
-                ))
+                .where(articleCollection.member.id.eq(memberId)
+                        .and(articleCollection.article.articleStatus.eq(ArticleStatus.ACTIVE)
+                                .and(article.member.id.notIn(excludeMembersId))))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -59,9 +64,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(articleCollection.count())
                 .from(articleCollection)
-                .where(articleCollection.member.id.eq(memberId).and(
-                        articleCollection.article.articleStatus.eq(ArticleStatus.ACTIVE)
-                ));
+                .where(articleCollection.member.id.eq(memberId)
+                        .and(articleCollection.article.articleStatus.eq(ArticleStatus.ACTIVE)
+                                .and(article.member.id.notIn(excludeMembersId))));
 
         return PageableExecutionUtils.getPage(articleCollections, pageable, countQuery::fetchOne);
     }
@@ -108,5 +113,24 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .where(block.fromMember.id.eq(memberId));
 
         return PageableExecutionUtils.getPage(blockList, pageable, countQuery::fetchOne);
+    }
+
+    /** 차단 기능에 따라 필터링 (내가 차단한 사람, 나를 차단한 사람을 검색 결과에서 제외 시킴) */
+    private List<Long> getExcludedMemberIds(Long memberId) {
+        List<Long> blockedMemberIds = queryFactory
+                .select(block.toMember.id)
+                .from(block)
+                .where(block.fromMember.id.eq(memberId))
+                .fetch();
+
+        List<Long> blockingMemberIds = queryFactory
+                .select(block.fromMember.id)
+                .from(block)
+                .where(block.toMember.id.eq(memberId))
+                .fetch();
+
+        return Stream.concat(blockedMemberIds.stream(), blockingMemberIds.stream())
+                .distinct()
+                .toList();
     }
 }

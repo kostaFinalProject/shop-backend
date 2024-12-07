@@ -72,11 +72,10 @@ public class CommentService {
 
         List<ReplyCommentResponseDto> dtos = replies.stream()
                 .map(reply -> {
-                    boolean like = validationService.existCommentLikeByCommentIdAndMemberId(reply.getId(), memberId);
                     Long likeId = validationService.findCommentLikeIdByCommentAndMember(reply.getId(), memberId);
 
                     return ReplyCommentResponseDto.createDto(reply.getId(), reply.getMember().getName(),
-                            reply.getContent(), reply.getCommentImg().getImgUrl(), reply.getLikes(), like, likeId);
+                            reply.getContent(), reply.getCommentImg().getImgUrl(), reply.getLikes(), likeId);
                 })
                 .toList();
 

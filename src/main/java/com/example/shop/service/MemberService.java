@@ -32,18 +32,17 @@ public class MemberService {
 
     /** 회원의 게시물 조회 */
     @Transactional(readOnly = true)
-    public Page<ArticleSummaryResponseDto> getArticle(Long memberId, Pageable pageable) {
+    public Page<ArticleSummaryResponseDto> getArticle(Long memberId, Long fromMemberId, Pageable pageable) {
 
-        Page<Article> articles = memberRepository.findArticleByMemberId(memberId, pageable);
+        Page<Article> articles = memberRepository.findArticleByMemberId(memberId, fromMemberId, pageable);
 
         List<ArticleSummaryResponseDto> dtos = articles.stream()
                 .map(article -> {
-                    boolean liked = validationService.existArticleLikeByArticleIdAndMemberId(article.getId(), memberId);
                     Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), memberId);
 
                     return ArticleSummaryResponseDto.createDto(article.getId(), memberId, article.getMember().getName(),
                             article.getArticleImages().get(0).getImgUrl(),
-                            article.getContent(), article.getLikes(), article.getViewCounts(), liked, likeId);
+                            article.getContent(), article.getLikes(), article.getViewCounts(), likeId);
                 })
                 .toList();
 
@@ -58,14 +57,13 @@ public class MemberService {
 
         List<ArticleCollectionResponseDto> dtos = articleCollections.stream()
                 .map(articleCollection -> {
-                    boolean liked = validationService.existArticleLikeByArticleIdAndMemberId(articleCollection.getArticle().getId(), memberId);
                     Long likeId = validationService.findArticleLikeIdByArticleAndMember(articleCollection.getArticle().getId(), memberId);
 
                     return ArticleCollectionResponseDto.createDto(articleCollection.getId(),
                             articleCollection.getArticle().getId(), articleCollection.getMember().getId(),
                             articleCollection.getMember().getName(), articleCollection.getArticle().getArticleImages().get(0).getImgUrl(),
                             articleCollection.getArticle().getContent(), articleCollection.getArticle().getLikes(),
-                            articleCollection.getArticle().getViewCounts(), liked, likeId);
+                            articleCollection.getArticle().getViewCounts(), likeId);
                 })
                 .toList();
 

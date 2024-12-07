@@ -13,15 +13,12 @@ public class CommentResponseDto {
     private String imageUrl;
     private long likeCount;
     private boolean hasReplies;
-    private boolean liked;
     private Long likeId;
 
     public static CommentResponseDto createDto(Long commentId, String memberName, String content,
-                                               String imageUrl, long likeCount, boolean hasReplies,
-                                               boolean liked, Long likeId) {
+                                               String imageUrl, long likeCount, boolean hasReplies, Long likeId) {
 
         return CommentResponseDto.builder().commentId(commentId).memberName(memberName).content(content)
-                .imageUrl(imageUrl).likeCount(likeCount).hasReplies(hasReplies)
-                .liked(liked).likeId(likeId).build();
+                .imageUrl(imageUrl).likeCount(likeCount).hasReplies(hasReplies).likeId(likeId).build();
     }
 }

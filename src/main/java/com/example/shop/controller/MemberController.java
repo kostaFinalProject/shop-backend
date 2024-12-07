@@ -27,13 +27,14 @@ public class MemberController {
     }
 
     /** 회원별 게시글 조회 */
-    @GetMapping("/{memberId}/articles")
+    @GetMapping("/{memberId}/{fromMemberId}/articles")
     public ResponseEntity<?> getMemberArticles(@PathVariable("memberId") Long memberId,
+                                               @PathVariable("fromMemberId") Long fromMemberId,
                                                @RequestParam(value = "page", defaultValue = "0") int page,
                                                @RequestParam(value = "size", defaultValue = "15") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(memberService.getArticle(memberId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getArticle(memberId, fromMemberId, pageable));
     }
 
     /** 회원별 저장된 게시글 조회 */

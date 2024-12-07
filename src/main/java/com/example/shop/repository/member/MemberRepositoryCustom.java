@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface MemberRepositoryCustom {
-    Page<Article> findArticleByMemberId(Long memberId, Pageable pageable);
+    Page<Article> findArticleByMemberId(Long memberId, Long fromMemberId, Pageable pageable);
     Page<ArticleCollection> findArticleCollectionByMemberId(Long memberId, Pageable pageable);
     Page<Follower> findFollowerByMemberId(Long memberId, Pageable pageable);
     Page<Block> findBlockByMemberId(Long memberId, Pageable pageable);

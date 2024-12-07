@@ -14,15 +14,14 @@ public class ArticleSummaryResponseDto {
     private String content;
     private long likeCount;
     private long viewCount;
-    private boolean liked;
     private Long likeId;
 
     public static ArticleSummaryResponseDto createDto(Long articleId, Long memberId, String memberName,
                                                       String imageUrl, String content, long likeCount,
-                                                      long viewCount, boolean liked, Long likeId) {
+                                                      long viewCount, Long likeId) {
 
         return ArticleSummaryResponseDto.builder().articleId(articleId).memberId(memberId).memberName(memberName)
                 .imageUrl(imageUrl).content(content).likeCount(likeCount)
-                .viewCount(viewCount).liked(liked).likeId(likeId).build();
+                .viewCount(viewCount).likeId(likeId).build();
     }
 }
