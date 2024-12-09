@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/shopDB
     username: root
-    password: root
+    password: 1234
 
   jpa:
     show-sql: false
@@ -27,8 +27,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: jhs990313@gmail.com
-    password: zqdogobomffhumms
+    username: dlsrn12354@gmail.com
+    password: qeaslprypdjyupkk
     default-encoding: UTF-8
     properties:
       mail:
@@ -75,10 +75,10 @@ management:
 
 mail:
   sender:
-    email: jhs990313@gmail.com
+    email: dlsrn12354@gmail.com
 
 file:
-  upload-dir: C://Users/JungHyunSu/uploads
+  upload-dir: C://uploads
 
 jwt:
   secret-key: cu2jh2MCUGC3mLRBGwm6jzKqQR1PRTKc9KOp4ssJGo=
