@@ -40,6 +40,10 @@ public class ValidationService {
                 .orElseThrow(() -> new IllegalArgumentException("유효한 회원이 아닙니다."));
     }
 
+    public boolean existsUserId(String userId) {
+        return memberRepository.existsByUserId(userId);
+    }
+
     public Article validateArticleById(Long articleId) {
         return articleRepository.findById(articleId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 게시글이 아닙니다."));
@@ -80,6 +84,10 @@ public class ValidationService {
 
     public Tag validateTagByName(String tagName) {
         return tagRepository.findByTag(tagName)
+                .map(tag -> {
+                    tag.incrementCount();
+                    return tag;
+                })
                 .orElseGet(() -> tagRepository.save(Tag.createTag(tagName)));
     }
 

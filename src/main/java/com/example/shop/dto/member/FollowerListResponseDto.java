@@ -9,9 +9,9 @@ import lombok.*;
 public class FollowerListResponseDto {
     private Long followId;
     private Long memberId;
-    private String memberName;
+    private String memberNickname;
 
     public static FollowerListResponseDto createDto(Long followId, Long memberId, String memberName) {
-        return FollowerListResponseDto.builder().followId(followId).memberId(memberId).memberName(memberName).build();
+        return FollowerListResponseDto.builder().followId(followId).memberId(memberId).memberNickname(memberName).build();
     }
 }

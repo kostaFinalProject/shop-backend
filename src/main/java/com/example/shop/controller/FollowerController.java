@@ -16,12 +16,19 @@ public class FollowerController {
 
     private final FollowerService followerService;
 
-    /** 팔로우 */
+    /** 팔로우 요청 */
     @PostMapping("/{memberId}/{followerId}")
-    public ResponseEntity<?> follow(@PathVariable("memberId") Long memberId,
-                                    @PathVariable("followerId") Long followerId) {
+    public ResponseEntity<?> followRequest(@PathVariable("memberId") Long memberId,
+                                           @PathVariable("followerId") Long followerId) {
         followerService.follow(memberId, followerId);
-        return ResponseEntity.status(HttpStatus.OK).body("팔로우");
+        return ResponseEntity.status(HttpStatus.OK).body("팔로우 요청을 보냈습니다.");
+    }
+
+    /** 팔로우 요청 수락 */
+    @PutMapping("/{followId}")
+    public ResponseEntity<?> followAccept(@PathVariable("followId") Long followerId) {
+        followerService.acceptFollower(followerId);
+        return ResponseEntity.status(HttpStatus.OK).body("팔로우 요청을 수락했습니다.");
     }
 
     /** 언팔로우 */

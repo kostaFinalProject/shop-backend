@@ -26,13 +26,17 @@ public class Follower {
     @JoinColumn(name = "follower_member_id")
     private Member follower;
 
+    @Enumerated(EnumType.STRING)
+    private FollowerStatus followerStatus;
+
     @Builder
     private Follower(Member followee, Member follower) {
         this.followee = followee;
         this.follower = follower;
+        this.followerStatus = FollowerStatus.REQUEST;
     }
 
-    /** 팔로우 */
+    /** 팔로우 요청 */
     public static Follower createFollower(Member followee, Member follower) {
         followee.setFollowers(1);
         follower.setFollowees(1);
@@ -44,4 +48,22 @@ public class Follower {
         followee.setFollowers(-1);
         follower.setFollowees(-1);
     }
+
+    public void updateFollowerStatus(FollowerStatus followerStatus) {
+        this.followerStatus = followerStatus;
+    }
+
+    /** 맞팔로우 수락 */
+    public Follower acceptFollower() {
+        followee.setFollowees(1);
+        follower.setFollowers(1);
+        this.followerStatus = FollowerStatus.ACCEPTED;
+
+        Follower newFollower = Follower.builder().followee(follower).follower(followee).build();
+        newFollower.followerStatus = FollowerStatus.ACCEPTED;
+
+        return newFollower;
+    }
+
+
 }

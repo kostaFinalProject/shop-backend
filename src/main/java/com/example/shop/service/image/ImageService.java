@@ -1,9 +1,6 @@
 package com.example.shop.service.image;
 
-import com.example.shop.domain.instagram.Article;
-import com.example.shop.domain.instagram.ArticleImg;
-import com.example.shop.domain.instagram.Comment;
-import com.example.shop.domain.instagram.CommentImg;
+import com.example.shop.domain.instagram.*;
 import com.example.shop.domain.shop.Item;
 import com.example.shop.domain.shop.ItemCategory;
 import com.example.shop.domain.shop.ItemCategoryImg;
@@ -141,7 +138,7 @@ public class ImageService {
         }
     }
 
-    /** 댓글/대댓글 */
+    /** 댓글 & 대댓글 */
 
     public CommentImg saveCommentImg(MultipartFile file) {
         String imgUrl = imgStorageService.store(file);
@@ -170,6 +167,38 @@ public class ImageService {
     public void deleteCommentImg(Comment comment) {
         if (comment.getCommentImg() != null) {
             imgStorageService.delete(comment.getCommentImg().getImgUrl());
+        }
+    }
+
+    /** 회원 프로필 이미지 */
+    public MemberProfileImg saveMemberProfileImg(MultipartFile file) {
+        String imgUrl = imgStorageService.store(file);
+        String imgFileNameInDb = Paths.get(imgUrl).getFileName().toString();
+
+        return MemberProfileImg.createMemberProfileImg(imgFileNameInDb, file.getOriginalFilename(), imgUrl);
+    }
+
+    public MemberProfileImg updateMemberProfileImg(Member member, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            deleteMemberProfileImg(member);
+            return null;
+        }
+
+        if (member.getMemberProfileImg() != null &&
+            member.getMemberProfileImg().getOriginImgName().equals(file.getOriginalFilename())) {
+            return member.getMemberProfileImg();
+        }
+
+        if (member.getMemberProfileImg() != null) {
+            imgStorageService.delete(member.getMemberProfileImg().getImgUrl());
+        }
+
+        return saveMemberProfileImg(file);
+    }
+
+    public void deleteMemberProfileImg(Member member) {
+        if (member.getMemberProfileImg() != null) {
+            imgStorageService.delete(member.getMemberProfileImg().getImgUrl());
         }
     }
 }

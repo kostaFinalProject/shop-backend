@@ -94,6 +94,52 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     @Override
+    public Page<Follower> findFollowingByMemberId(Long memberId, Pageable pageable) {
+
+        QMember followeeMember = new QMember("followeeMember");
+        QMember followerMember = new QMember("followerMember");
+
+        List<Follower> followerList = queryFactory.selectFrom(follower1)
+                .join(follower1.followee, followeeMember).fetchJoin()
+                .join(follower1.follower, followerMember).fetchJoin()
+                .where(follower1.follower.id.eq(memberId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(follower1.count())
+                .from(follower1)
+                .where(follower1.followee.id.eq(memberId));
+
+        return PageableExecutionUtils.getPage(followerList, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<Follower> findFollowingRequestByMemberId(Long memberId, Pageable pageable) {
+
+        QMember followeeMember = new QMember("followeeMember");
+        QMember followerMember = new QMember("followerMember");
+
+        List<Follower> followerList = queryFactory.selectFrom(follower1)
+                .join(follower1.followee, followeeMember).fetchJoin()
+                .join(follower1.follower, followerMember).fetchJoin()
+                .where(follower1.follower.id.eq(memberId)
+                        .and(follower1.followerStatus.eq(FollowerStatus.REQUEST)))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(follower1.count())
+                .from(follower1)
+                .where(follower1.followee.id.eq(memberId)
+                        .and(follower1.followerStatus.eq(FollowerStatus.REQUEST)));
+
+        return PageableExecutionUtils.getPage(followerList, pageable, countQuery::fetchOne);
+    }
+
+    @Override
     public Page<Block> findBlockByMemberId(Long memberId, Pageable pageable) {
 
         QMember fromMember = new QMember("fromMember");

@@ -143,7 +143,7 @@ public class ArticleService {
         long articleCommentsCount = commentRepository.countByArticleId(articleId);
         Long likeId = validationService.findArticleLikeIdByArticleAndMember(articleId, memberId);
 
-        return ArticleDetailResponseDto.createDto(articleId, article.getMember().getId(), article.getMember().getName(),
+        return ArticleDetailResponseDto.createDto(articleId, article.getMember().getId(), article.getMember().getNickname(),
                 articleImages, hashTags, items, article.getLikes(), articleCommentsCount, likeId);
     }
 
@@ -157,7 +157,7 @@ public class ArticleService {
                     Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), memberId);
 
                     return ArticleSummaryResponseDto.createDto(article.getId(), article.getMember().getId(),
-                            article.getMember().getName(), article.getArticleImages().get(0).getImgUrl(),
+                            article.getMember().getNickname(), article.getArticleImages().get(0).getImgUrl(),
                             article.getContent(), article.getLikes(), article.getViewCounts(),likeId);
                 })
                 .toList();
@@ -173,7 +173,7 @@ public class ArticleService {
         List<CommentResponseDto> dtos = comments.stream()
                 .map(comment -> {
                     Long likeId = validationService.findCommentLikeIdByCommentAndMember(comment.getId(), memberId);
-                    return CommentResponseDto.createDto(comment.getId(), comment.getMember().getName(), comment.getContent(),
+                    return CommentResponseDto.createDto(comment.getId(), comment.getMember().getNickname(), comment.getContent(),
                             comment.getCommentImg().getImgUrl(), comment.getLikes(), comment.isReplyComments(), likeId);
                 })
                 .toList();

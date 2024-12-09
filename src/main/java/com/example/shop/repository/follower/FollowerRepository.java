@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface FollowerRepository extends JpaRepository<Follower, Long>, FollowerRepositoryCustom {
-    Optional<Follower> findByFolloweeAndFollower(Member followee, Member follower);
+    boolean existsByFolloweeAndFollower(Member followee, Member follower);
 }

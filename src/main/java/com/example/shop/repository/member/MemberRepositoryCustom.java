@@ -11,5 +11,7 @@ public interface MemberRepositoryCustom {
     Page<Article> findArticleByMemberId(Long memberId, Long fromMemberId, Pageable pageable);
     Page<ArticleCollection> findArticleCollectionByMemberId(Long memberId, Pageable pageable);
     Page<Follower> findFollowerByMemberId(Long memberId, Pageable pageable);
+    Page<Follower> findFollowingByMemberId(Long memberId, Pageable pageable);
+    Page<Follower> findFollowingRequestByMemberId(Long memberId, Pageable pageable);
     Page<Block> findBlockByMemberId(Long memberId, Pageable pageable);
 }

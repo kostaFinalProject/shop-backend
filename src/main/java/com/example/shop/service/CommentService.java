@@ -74,7 +74,7 @@ public class CommentService {
                 .map(reply -> {
                     Long likeId = validationService.findCommentLikeIdByCommentAndMember(reply.getId(), memberId);
 
-                    return ReplyCommentResponseDto.createDto(reply.getId(), reply.getMember().getName(),
+                    return ReplyCommentResponseDto.createDto(reply.getId(), reply.getMember().getNickname(),
                             reply.getContent(), reply.getCommentImg().getImgUrl(), reply.getLikes(), likeId);
                 })
                 .toList();
