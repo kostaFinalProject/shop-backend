@@ -109,7 +109,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     @Override
-    public Page<Follower> findFollowerByMemberId(Long memberId, Long fromMemberId, Pageable pageable) {
+    public Page<Follower> findFollowerByMemberId(Long targetMemberId, Long fromMemberId, Pageable pageable) {
         QMember followeeMember = new QMember("followeeMember");
         QMember followerMember = new QMember("followerMember");
 
@@ -119,7 +119,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         List<Follower> followerList = queryFactory.selectFrom(follower1)
                 .join(follower1.followee, followeeMember).fetchJoin()
                 .join(follower1.follower, followerMember).fetchJoin()
-                .where(follower1.followee.id.eq(memberId)
+                .where(follower1.followee.id.eq(targetMemberId)
                         .and(follower1.followee.id.notIn(excludeMembersId))
                         .and(
                                 follower1.followee.accountStatus.eq(AccountStatus.PUBLIC)
@@ -134,7 +134,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(follower1.count())
                 .from(follower1)
-                .where(follower1.followee.id.eq(memberId)
+                .where(follower1.followee.id.eq(targetMemberId)
                         .and(follower1.followee.id.notIn(excludeMembersId))
                         .and(
                                 follower1.followee.accountStatus.eq(AccountStatus.PUBLIC)
@@ -147,7 +147,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     @Override
-    public Page<Follower> findFollowingByMemberId(Long memberId, Long fromMemberId, Pageable pageable) {
+    public Page<Follower> findFollowingByMemberId(Long targetMemberId, Long fromMemberId, Pageable pageable) {
         QMember followeeMember = new QMember("followeeMember");
         QMember followerMember = new QMember("followerMember");
 
@@ -157,7 +157,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         List<Follower> followerList = queryFactory.selectFrom(follower1)
                 .join(follower1.followee, followeeMember).fetchJoin()
                 .join(follower1.follower, followerMember).fetchJoin()
-                .where(follower1.follower.id.eq(memberId)
+                .where(follower1.follower.id.eq(targetMemberId)
                         .and(follower1.follower.id.notIn(excludeMembersId))
                         .and(
                                 followeeMember.accountStatus.eq(AccountStatus.PUBLIC)
@@ -172,7 +172,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(follower1.count())
                 .from(follower1)
-                .where(follower1.follower.id.eq(memberId)
+                .where(follower1.follower.id.eq(targetMemberId)
                         .and(follower1.follower.id.notIn(excludeMembersId))
                         .and(
                                 followeeMember.accountStatus.eq(AccountStatus.PUBLIC)

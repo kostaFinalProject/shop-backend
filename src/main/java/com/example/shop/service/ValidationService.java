@@ -11,6 +11,7 @@ import com.example.shop.repository.block.BlockRepository;
 import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.repository.commentlike.CommentLikeRepository;
 import com.example.shop.repository.follower.FollowerRepository;
+import com.example.shop.repository.item.ItemRepository;
 import com.example.shop.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

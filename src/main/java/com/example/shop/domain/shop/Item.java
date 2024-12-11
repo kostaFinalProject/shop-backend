@@ -1,5 +1,6 @@
 package com.example.shop.domain.shop;
 
+import com.example.shop.domain.baseentity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -15,7 +16,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Item {
+public class Item extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
@@ -26,6 +27,7 @@ public class Item {
     private ItemCategory itemCategory;
 
     private String manufacturer;
+    private String seller;
     private String name;
     private int price;
     private int allStockQuantity;
@@ -40,10 +42,11 @@ public class Item {
     private List<ItemImg> itemImages = new ArrayList<>();
 
     @Builder
-    private Item(ItemCategory itemCategory, String manufacturer, String name, int price,
+    private Item(ItemCategory itemCategory, String manufacturer, String seller, String name, int price,
                  List<ItemSize> itemSizes, List<ItemImg> itemImages) {
         this.itemCategory = itemCategory;
         this.manufacturer = manufacturer;
+        this.seller = seller;
         this.name = name;
         this.price = price;
         this.itemSizes = itemSizes;
@@ -51,9 +54,9 @@ public class Item {
         this.itemStatus = ItemStatus.ACTIVE;
     }
 
-    public static Item createItem(ItemCategory itemCategory, String manufacturer, String name,
+    public static Item createItem(ItemCategory itemCategory, String manufacturer, String name, String seller,
                                   int price, List<ItemSize> itemSizes, List<ItemImg> itemImages) {
-        Item item = Item.builder().itemCategory(itemCategory).manufacturer(manufacturer).name(name)
+        Item item = Item.builder().itemCategory(itemCategory).manufacturer(manufacturer).name(name).seller(seller)
                 .price(price).itemSizes(itemSizes).itemImages(itemImages).build();
 
         for (ItemSize itemSize : itemSizes) {

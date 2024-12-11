@@ -1,8 +1,11 @@
 package com.example.shop.controller;
 
+import com.example.shop.aop.PublicApi;
 import com.example.shop.dto.item.ItemRequestDto;
 import com.example.shop.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,17 @@ public class ItemController {
                                       @RequestPart("files")List<MultipartFile> files) {
         itemService.saveItem(dto, files);
         return ResponseEntity.status(HttpStatus.CREATED).body("상품이 성공적으로 생성되었습니다.");
+    }
+
+    @PublicApi
+    @GetMapping
+    public ResponseEntity<?> searchItems(@RequestParam(value = "category", required = false) String category,
+                                         @RequestParam(value = "keyword", required = false) String keyword,
+                                         @RequestParam(value = "page", defaultValue = "0") int page,
+                                         @RequestParam(value = "size", defaultValue = "20") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getSearchItem(category, keyword, pageable));
     }
 
     @PutMapping("/{itemId}")

@@ -11,6 +11,7 @@ public class ItemRequestDto {
     private String itemCategory;
     private String manufacturer;
     private String name;
+    private String seller;
     private int price;
     private List<ItemSizeDto> itemSizes = new ArrayList<>();
 }

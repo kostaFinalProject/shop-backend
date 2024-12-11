@@ -3,9 +3,13 @@ package com.example.shop.service;
 import com.example.shop.domain.shop.*;
 import com.example.shop.dto.item.ItemRequestDto;
 import com.example.shop.dto.item.ItemSizeDto;
-import com.example.shop.repository.ItemRepository;
+import com.example.shop.dto.item.ItemSummaryResponseDto;
+import com.example.shop.repository.item.ItemRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +42,7 @@ public class ItemService {
 
         List<ItemImg> itemImgs = itemImgService.saveItemImgs(itemImages);
 
-        Item item = Item.createItem(itemCategory, dto.getManufacturer(), dto.getName(), dto.getPrice(), itemSizes, itemImgs);
+        Item item = Item.createItem(itemCategory, dto.getManufacturer(), dto.getName(), dto.getSeller(), dto.getPrice(), itemSizes, itemImgs);
         itemRepository.save(item);
     }
 
@@ -88,5 +92,18 @@ public class ItemService {
 
         itemImgService.deleteItemImg(item);
         item.deleteItem();
+    }
+
+    /** 상품 통합 조회 */
+    @Transactional(readOnly = true)
+    public Page<ItemSummaryResponseDto> getSearchItem(String category, String keyword, Pageable pageable) {
+        Page<Item> items = itemRepository.searchItems(category, keyword, pageable);
+
+        List<ItemSummaryResponseDto> dtos = items.stream()
+                .map(item -> ItemSummaryResponseDto.createDto(item.getId(), item.getItemCategory().getName(), item.getManufacturer(), item.getName(),
+                        item.getPrice(), item.getRepItemImage(), item.getItemStatus().toString(), item.getSeller()))
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, items.getTotalElements());
     }
 }

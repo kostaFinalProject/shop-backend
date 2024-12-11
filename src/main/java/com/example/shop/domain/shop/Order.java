@@ -1,5 +1,6 @@
 package com.example.shop.domain.shop;
 
+import com.example.shop.domain.baseentity.BaseEntity;
 import com.example.shop.domain.instagram.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -16,7 +17,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter @Table(name = "orders")
-public class Order {
+public class Order extends BaseEntity {
 
     @Id @GeneratedValue
     @Column(name = "order_id")
