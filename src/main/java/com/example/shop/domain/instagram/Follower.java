@@ -64,6 +64,4 @@ public class Follower {
 
         return newFollower;
     }
-
-
 }

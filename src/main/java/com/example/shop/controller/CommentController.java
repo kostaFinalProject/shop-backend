@@ -1,5 +1,6 @@
 package com.example.shop.controller;
 
+import com.example.shop.aop.PublicApi;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.dto.instagram.comment.CommentUpdateRequestDto;
 import com.example.shop.service.CommentService;
@@ -21,7 +22,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    /** 대댓글 수정 */
+    /** 대댓글 작성 */
     @PostMapping("/{memberId}/{commentId}")
     public ResponseEntity<?> saveReply(@PathVariable("memberId") Long memberId,
                                          @PathVariable("commentId") Long commentId,
@@ -33,6 +34,7 @@ public class CommentController {
     }
 
     /** 대댓글 전체 조회 (페이징 적용) */
+    @PublicApi
     @GetMapping("/{memberId}/{commentId}")
     public ResponseEntity<?> getReplies(@PathVariable("memberId") Long memberId,
                                         @PathVariable("commentId") Long commentId,

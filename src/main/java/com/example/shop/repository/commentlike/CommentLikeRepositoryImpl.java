@@ -26,6 +26,10 @@ public class CommentLikeRepositoryImpl implements CommentLikeRepositoryCustom {
 
     @Override
     public Long findCommentLikeIdByCommentAndMember(Long commentId, Long memberId) {
+        if (memberId == null) {
+            return null;
+        }
+
         return queryFactory.select(commentLike.id)
                 .from(commentLike)
                 .where(commentLike.comment.id.eq(commentId)

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/articlecollections")
+@RequestMapping("/api/v1/article-collections")
 public class ArticleCollectionController {
 
     private final ArticleCollectionService articleCollectionService;

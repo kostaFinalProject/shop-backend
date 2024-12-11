@@ -1,5 +1,6 @@
 package com.example.shop.controller;
 
+import com.example.shop.aop.PublicApi;
 import com.example.shop.dto.instagram.article.ArticleRequestDto;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.service.ArticleService;
@@ -45,24 +46,29 @@ public class ArticleController {
     }
 
     /** 게시글 전체 조회 */
+    @PublicApi
     @GetMapping("/{memberId}")
-    public ResponseEntity<?> getArticles(@PathVariable("memberId") Long memberId,
+    public ResponseEntity<?> getArticles(@PathVariable(value = "memberId", required = false) Long memberId,
+                                         @RequestParam(value = "tag", required = false) String tag,
+                                         @RequestParam(value = "item", required = false) String item,
                                          @RequestParam(value = "page", defaultValue = "0") int page,
                                          @RequestParam(value = "size", defaultValue = "15") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, tag, item, pageable));
     }
 
     /** 게시글 단건 조회 */
+    @PublicApi
     @GetMapping("/{memberId}/{articleId}")
-    public ResponseEntity<?> getArticle(@PathVariable("memberId") Long memberId,
+    public ResponseEntity<?> getArticle(@PathVariable(value = "memberId", required = false) Long memberId,
                                         @PathVariable("articleId") Long articleId) {
         return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticle(memberId, articleId));
     }
 
     /** 게시글 댓글 조회 */
-    @GetMapping("/{memberId}/{articleId}/comments")
+    @PublicApi
+    @GetMapping("/comments/{memberId}/{articleId}")
     public ResponseEntity<?> getArticleComments(@PathVariable("memberId") Long memberId,
                                                 @PathVariable("articleId") Long articleId,
                                                 @RequestParam(value = "page", defaultValue = "0") int page,
@@ -84,7 +90,7 @@ public class ArticleController {
     }
 
     /** 게시글 활성화 (관리자 기능) */
-    @PutMapping("/{memberId}/{articleId}/active")
+    @PutMapping("/active/{memberId}/{articleId}")
     public ResponseEntity<?> activeArticle(@PathVariable("memberId") Long memberId,
                                              @PathVariable("articleId") Long articleId) {
 
@@ -93,7 +99,7 @@ public class ArticleController {
     }
 
     /** 게시글 비활성화 (관리자 기능) */
-    @PutMapping("/{memberId}/{articleId}/inactive")
+    @PutMapping("/inactive/{memberId}/{articleId}")
     public ResponseEntity<?> inactiveArticle(@PathVariable("memberId") Long memberId,
                                              @PathVariable("articleId") Long articleId) {
 

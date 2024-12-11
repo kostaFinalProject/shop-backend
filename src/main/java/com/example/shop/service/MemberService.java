@@ -1,6 +1,7 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
+import com.example.shop.dto.login.LoginDto;
 import com.example.shop.dto.member.*;
 import com.example.shop.dto.instagram.article.ArticleSummaryResponseDto;
 import com.example.shop.repository.member.MemberRepository;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,16 +22,23 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ValidationService validationService;
     private final ImageService imageService;
+    private final TokenService tokenService;
 
     /** 회원 가입 */
     @Transactional
     public void saveMember(MemberSignUpDto dto) {
+        if (memberRepository.duplicateMember(dto.getUserId(), dto.getNickname(), dto.getEmail())) {
+            throw new IllegalArgumentException("이미 가입된 ID이거나 사용중인 닉네임이거나 이메일입니다.");
+        }
+
         Address address = Address.createAddress(dto.getPostCode(), dto.getRoadAddress(), dto.getRoadAddress());
 
-        Member member = Member.createMember(dto.getUserId(), dto.getPassword(), dto.getName(), dto.getNickname(),
-                dto.getEmail(), dto.getPhone(), address);
+        Member member = Member.createMember(dto.getUserId(), bCryptPasswordEncoder.encode(dto.getPassword()),
+                dto.getName(), dto.getNickname(), dto.getEmail(),
+                dto.getPhone(), address, Grade.valueOf(dto.getGrade()), Provider.valueOf(dto.getProvider()));
 
         memberRepository.save(member);
     }
@@ -64,17 +73,27 @@ public class MemberService {
         member.updateMemberProfile(memberProfileImg, dto.getIntroduction());
     }
 
+    /** 회원 정보 조회*/
+    @Transactional(readOnly = true)
+    public MemberResponseDto getMemberInfo(Long memberId) {
+        Member findMember = validationService.validateMemberById(memberId);
+
+        return MemberResponseDto.createDto(findMember.getId(), findMember.getName(), findMember.getNickname(),
+                findMember.getEmail(), findMember.getPhone(), findMember.getAddress().getPostCode(),
+                findMember.getAddress().getRoadAddress(), findMember.getAddress().getDetailAddress());
+    }
+
     /** 회원의 게시물 조회 (프로필 비공개 시 팔로우 해야만 조회 가능) */
     @Transactional(readOnly = true)
-    public Page<ArticleSummaryResponseDto> getArticle(Long memberId, Long targetId, Pageable pageable) {
+    public Page<ArticleSummaryResponseDto> getArticle(Long targetMemberId, Long fromMemberId, Pageable pageable) {
 
-        Page<Article> articles = memberRepository.findArticleByMemberId(memberId, targetId, pageable);
+        Page<Article> articles = memberRepository.findArticleByMemberId(targetMemberId, fromMemberId, pageable);
 
         List<ArticleSummaryResponseDto> dtos = articles.stream()
                 .map(article -> {
-                    Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), memberId);
+                    Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), fromMemberId);
 
-                    return ArticleSummaryResponseDto.createDto(article.getId(), memberId, article.getMember().getNickname(),
+                    return ArticleSummaryResponseDto.createDto(article.getId(), targetMemberId, article.getMember().getNickname(),
                             article.getArticleImages().get(0).getImgUrl(),
                             article.getContent(), article.getLikes(), article.getViewCounts(), likeId);
                 })
@@ -106,9 +125,9 @@ public class MemberService {
 
     /** 회원의 팔로우 리스트 조회 */
     @Transactional(readOnly = true)
-    public Page<FollowerListResponseDto> getFollower(Long memberId, Pageable pageable) {
+    public Page<FollowerListResponseDto> getFollower(Long memberId, Long fromMemberId, Pageable pageable) {
 
-        Page<Follower> followers = memberRepository.findFollowerByMemberId(memberId, pageable);
+        Page<Follower> followers = memberRepository.findFollowerByMemberId(memberId, fromMemberId, pageable);
 
         List<FollowerListResponseDto> dtos = followers.stream()
                 .map(follower -> FollowerListResponseDto.createDto(follower.getId(),
@@ -120,9 +139,9 @@ public class MemberService {
 
     /** 회원의 팔로워 리스트 조회 */
     @Transactional(readOnly = true)
-    public Page<FollowerListResponseDto> getFollowee(Long memberId, Pageable pageable) {
+    public Page<FollowerListResponseDto> getFollowee(Long memberId, Long fromMemberId, Pageable pageable) {
 
-        Page<Follower> followers = memberRepository.findFollowingByMemberId(memberId, pageable);
+        Page<Follower> followers = memberRepository.findFollowingByMemberId(memberId, fromMemberId,pageable);
 
         List<FollowerListResponseDto> dtos = followers.stream()
                 .map(follower -> FollowerListResponseDto.createDto(follower.getId(),
@@ -159,6 +178,47 @@ public class MemberService {
         return new PageImpl<>(dtos, pageable, blocks.getTotalElements());
     }
 
+    /** 회원 조회 */
+    @Transactional(readOnly = true)
+    public Page<MemberListResponseDto> getMemberList(String nickname, Long memberId, Pageable pageable) {
+        Page<Member> members = memberRepository.findMembersByNickName(nickname, memberId, pageable);
+
+        List<MemberListResponseDto> dtos = members.stream()
+                .map(member -> MemberListResponseDto.createDto(member.getId(), member.getNickname()))
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, members.getTotalElements());
+    }
+
+    /** 로그인 */
+    @Transactional(readOnly = true)
+    public String login(LoginDto loginDto) {
+        Member member = memberRepository.findByUserId(loginDto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 아이디입니다."));
+
+        if (!bCryptPasswordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        String accessToken = tokenService.generateAccessToken(member.getUserId());
+        String refreshToken = tokenService.generateRefreshToken(member.getUserId());
+
+        return accessToken + ":" + refreshToken;
+    }
+
+    /** 로그아웃 */
+    @Transactional
+    public void logout(String token, String refreshToken) {
+        tokenService.invalidateToken(token);
+        tokenService.invalidateToken(refreshToken);
+    }
+
+    /** Access Token 재발급 */
+    @Transactional(readOnly = true)
+    public String refreshAccessToken(String refreshToken) {
+        return tokenService.refreshAccessToken(refreshToken);
+    }
+
     /** 관리자 권한 승인 */
     @Transactional
     public void promotionAdmin(Long memberId) {
@@ -182,8 +242,8 @@ public class MemberService {
 
     /** 사용자 게시글, 댓글 사용 권한 재부여 */
     @Transactional
-    public void restartArticle(Long memberId) {
+    public void enableArticle(Long memberId) {
         Member member = validationService.validateMemberById(memberId);
-        member.restartArticle();
+        member.enableArticle();
     }
 }

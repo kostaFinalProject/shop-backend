@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/itemcategories")
+@RequestMapping("/api/v1/item-categories")
 public class ItemCategoryController {
 
     private final ItemCategoryService itemCategoryService;

@@ -40,8 +40,9 @@ public class ValidationService {
                 .orElseThrow(() -> new IllegalArgumentException("유효한 회원이 아닙니다."));
     }
 
-    public boolean existsUserId(String userId) {
-        return memberRepository.existsByUserId(userId);
+    public Member validateMemberByUserId(String userId) {
+        return memberRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유효한 회원이 아닙니다."));
     }
 
     public Article validateArticleById(Long articleId) {

@@ -14,4 +14,6 @@ public class MemberSignUpDto {
     private String postCode;
     private String roadAddress;
     private String detailAddress;
+    private String grade;
+    private String provider;
 }

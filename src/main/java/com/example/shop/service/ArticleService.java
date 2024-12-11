@@ -88,10 +88,6 @@ public class ArticleService {
 
         Article article = validationService.validateArticleAndMemberById(articleId, memberId);
 
-        if (!article.getMember().getId().equals(memberId)) {
-            throw new IllegalArgumentException("수정할 권한이 없습니다.");
-        }
-
         List<ArticleImg> articleImgs = imageService.updateArticleImgs(article, articleImages);
         article.updateArticleImages(articleImgs);
 
@@ -119,12 +115,8 @@ public class ArticleService {
     /** 게시글 단건 조회 */
     @Transactional
     public ArticleDetailResponseDto getArticle(Long memberId, Long articleId) {
-        Article article = articleRepository.findArticleWithWriterById(memberId, articleId)
+        Article article = articleRepository.findArticleWithWriterById(articleId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 게시글이 아니거나 차단된 게시글입니다."));
-
-        if (article.getArticleStatus() != ArticleStatus.ACTIVE) {
-            throw new NotFoundException("비공개 되거나 삭제된 게시글입니다.");
-        }
 
         article.incrementViewCounts();
 
@@ -149,8 +141,8 @@ public class ArticleService {
 
     /** 게시글 전체 조회 */
     @Transactional(readOnly = true)
-    public Page<ArticleSummaryResponseDto> getArticles(Long memberId, Pageable pageable) {
-        Page<Article> articles = articleRepository.findAllArticles(memberId, pageable);
+    public Page<ArticleSummaryResponseDto> getArticles(Long memberId, String tag, String item, Pageable pageable) {
+        Page<Article> articles = articleRepository.searchArticles(memberId, tag, item, pageable);
 
         List<ArticleSummaryResponseDto> dtos = articles.stream()
                 .map(article -> {

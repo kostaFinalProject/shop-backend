@@ -26,6 +26,10 @@ public class ArticleLikeRepositoryImpl implements ArticleLikeRepositoryCustom{
 
     @Override
     public Long findArticleLikeIdByArticleAndMember(Long articleId, Long memberId) {
+        if (memberId == null) {
+            return null;
+        }
+
         return queryFactory
                 .select(articleLike.id)
                 .from(articleLike)

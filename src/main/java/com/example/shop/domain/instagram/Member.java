@@ -36,9 +36,9 @@ public class Member {
     private MemberProfileImg memberProfileImg;
     private String introduction;
 
-    private int articles; // 게시글 횟수
-    private long followees; // 사용자를 팔로우 하는 사람의 수
-    private long followers; // 사용자가 팔로우 하는 사람의 수
+    private int articles;
+    private long followees;
+    private long followers;
 
     @Enumerated(EnumType.STRING)
     private Grade grade;
@@ -46,9 +46,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus;
 
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
     @Builder
     private Member(String userId, String password, String name, String nickname, String email, String phone,
-                   Address address, MemberProfileImg memberProfileImg, String introduction, Grade grade) {
+                   Address address, MemberProfileImg memberProfileImg, String introduction, Grade grade, Provider provider) {
         this.userId = userId;
         this.password = password;
         this.name = name;
@@ -63,15 +66,15 @@ public class Member {
         this.followees = 0;
         this.followers = 0;
         this.accountStatus = AccountStatus.PRIVATE;
+        this.provider = provider;
     }
 
     /** 회원 생성 */
     public static Member createMember(String userId, String password, String name, String nickname, String email,
-                                      String phone, Address address) {
+                                      String phone, Address address, Grade grade, Provider provider) {
 
-        Grade grade = email.contains("@company.com") ? Grade.NO_AUTHORIZATION_ADMIN : Grade.USER;
-        return Member.builder().userId(userId).password(password).name(name)
-                .nickname(nickname).email(email).phone(phone).address(address).grade(grade).build();
+        return Member.builder().userId(userId).password(password).name(name).nickname(nickname)
+                .email(email).phone(phone).address(address).grade(grade).provider(provider).build();
     }
 
     /**
@@ -105,7 +108,7 @@ public class Member {
     }
 
     /** 사용자 게시글, 댓글 사용 권한 재부여 (관리자 권한) */
-    public void restartArticle() {
+    public void enableArticle() {
         this.grade = Grade.USER;
     }
 

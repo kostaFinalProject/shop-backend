@@ -1,6 +1,8 @@
 package com.example.shop.repository.article;
 
 import com.example.shop.domain.instagram.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +15,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.example.shop.domain.instagram.QArticle.article;
+import static com.example.shop.domain.instagram.QArticleItem.articleItem;
+import static com.example.shop.domain.instagram.QArticleTag.articleTag;
 import static com.example.shop.domain.instagram.QBlock.block;
 import static com.example.shop.domain.instagram.QComment.comment;
+import static com.example.shop.domain.instagram.QFollower.follower1;
 import static com.example.shop.domain.instagram.QMember.member;
 
 @RequiredArgsConstructor
@@ -23,14 +28,10 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Optional<Article> findArticleWithWriterById(Long memberId, Long articleId) {
-
-        List<Long> excludeMembersId = getExcludedMemberIds(memberId);
-
+    public Optional<Article> findArticleWithWriterById(Long articleId) {
         Article result = queryFactory.selectFrom(article)
                 .join(article.member, member).fetchJoin()
-                .where(article.id.eq(articleId)
-                        .and(article.member.id.notIn(excludeMembersId)))
+                .where(article.id.eq(articleId))
                 .fetchOne();
 
         return Optional.ofNullable(result);
@@ -58,22 +59,41 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
     }
 
     @Override
-    public Page<Article> findAllArticles(Long memberId, Pageable pageable) {
+    public Page<Article> searchArticles(Long memberId, String tag, String item, Pageable pageable) {
+        BooleanExpression baseCondition;
+        BooleanExpression commonCondition = article.articleStatus.eq(ArticleStatus.ACTIVE);
 
-        List<Long> excludeMembersId = getExcludedMemberIds(memberId);
+        if (memberId != null) {
+            List<Long> excludeMembersId = getExcludedMemberIds(memberId);
+            List<Long> accessiblePrivateMemberIds = getFollowerList(memberId);
+
+            baseCondition = commonCondition
+                    .and(article.member.id.notIn(excludeMembersId))
+                    .and(article.member.accountStatus.eq(AccountStatus.PUBLIC)
+                            .or(article.member.id.in(accessiblePrivateMemberIds))
+                            .or(article.member.id.eq(memberId)));
+        } else {
+            baseCondition = commonCondition.and(article.member.accountStatus.eq(AccountStatus.PUBLIC));
+        }
+
+        BooleanExpression tagCondition = hasTag(tag);
+        BooleanExpression itemCondition = hasItem(item);
+        BooleanExpression combinedConditions = combineConditions(baseCondition, tagCondition, itemCondition);
 
         List<Article> articles = queryFactory.selectFrom(article)
-                .where(article.member.id.notIn(excludeMembersId))
+                .join(article.member, member)
+                .where(combinedConditions)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory.select(article.count())
                 .from(article)
-                .where(article.member.id.notIn(excludeMembersId));
+                .where(combinedConditions);
 
         return PageableExecutionUtils.getPage(articles, pageable, countQuery::fetchOne);
     }
+
 
     @Override
     public Optional<Article> validateArticleAndMemberById(Long articleId, Long memberId) {
@@ -104,5 +124,40 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
         return Stream.concat(blockedMemberIds.stream(), blockingMemberIds.stream())
                 .distinct()
                 .toList();
+    }
+
+    /** 비공개 계정이면 팔로우 해야 조회 가능 */
+    private List<Long> getFollowerList(Long memberId) {
+        return queryFactory
+                .select(follower1.follower.id)
+                .from(follower1)
+                .where(follower1.followee.id.eq(memberId))
+                .fetch();
+    }
+
+    private BooleanExpression hasTag(String tag) {
+        if (tag == null || tag.isBlank()) {
+            return null;
+        }
+
+        return article.articleTags.any().tag.tag.containsIgnoreCase(tag);
+    }
+
+    private BooleanExpression hasItem(String item) {
+        if (item == null || item.isBlank()) {
+            return null;
+        }
+
+        return article.articleItems.any().item.name.containsIgnoreCase(item);
+    }
+
+    private BooleanExpression combineConditions(BooleanExpression... conditions) {
+        BooleanExpression result = null;
+        for (BooleanExpression condition : conditions) {
+            if (condition != null) {
+                result = (result == null) ? condition : result.and(condition);
+            }
+        }
+        return result;
     }
 }

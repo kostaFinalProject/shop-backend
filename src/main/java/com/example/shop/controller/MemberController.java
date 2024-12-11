@@ -1,8 +1,12 @@
 package com.example.shop.controller;
 
-import com.example.shop.dto.member.MemberProfileUpdateDto;
-import com.example.shop.dto.member.MemberSignUpDto;
-import com.example.shop.dto.member.MemberUpdateDto;
+import com.example.shop.aop.PublicApi;
+import com.example.shop.aop.SecurityAspect;
+import com.example.shop.aop.TokenApi;
+import com.example.shop.dto.login.LoginDto;
+import com.example.shop.dto.login.LoginResponseDto;
+import com.example.shop.dto.login.RefreshTokenResponse;
+import com.example.shop.dto.member.*;
 import com.example.shop.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -23,50 +27,62 @@ public class MemberController {
     private final MemberService memberService;
 
     /** 회원 가입 */
+    @PublicApi
     @PostMapping
     public ResponseEntity<?> saveMember(@RequestBody MemberSignUpDto dto) {
         memberService.saveMember(dto);
         return ResponseEntity.status(HttpStatus.OK).body("회원가입에 성공했습니다.");
     }
 
+    /** 회원 정보 조회 */
+    @GetMapping
+    public ResponseEntity<?> getMember() {
+        Long memberId = SecurityAspect.getCurrentMemberId();
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getMemberInfo(memberId));
+    }
+
     /** 회원별 게시글 조회 */
-    @GetMapping("/{memberId}/{targetId}/articles")
-    public ResponseEntity<?> getMemberArticles(@PathVariable("memberId") Long memberId,
-                                               @PathVariable("targetId") Long targetId,
+    @GetMapping("/articles/{targetId}")
+    public ResponseEntity<?> getMemberArticles(@PathVariable("targetId") Long targetId,
                                                @RequestParam(value = "page", defaultValue = "0") int page,
                                                @RequestParam(value = "size", defaultValue = "15") int size) {
+
+        Long memberId = SecurityAspect.getCurrentMemberId();
 
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getArticle(memberId, targetId, pageable));
     }
 
     /** 회원별 저장된 게시글 조회 */
-    @GetMapping("/{memberId}/articlecollections")
-    public ResponseEntity<?> getMemberArticleCollections(@PathVariable("memberId") Long memberId,
-                                                         @RequestParam(value = "page", defaultValue = "0") int page,
+    @GetMapping("/articlecollections")
+    public ResponseEntity<?> getMemberArticleCollections(@RequestParam(value = "page", defaultValue = "0") int page,
                                                          @RequestParam(value = "size", defaultValue = "15") int size) {
+
+        Long memberId = SecurityAspect.getCurrentMemberId();
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getArticleCollection(memberId, pageable));
     }
 
     /** 회원의 팔로우 리스트 조회 */
-    @GetMapping("/{memberId}/followers")
-    public ResponseEntity<?> getMemberFollowerList(@PathVariable("memberId") Long memberId,
+    @GetMapping("/followers/{targetMemberId}")
+    public ResponseEntity<?> getMemberFollowerList(@PathVariable("targetMemberId") Long targetMemberId,
                                                    @RequestParam(value = "page", defaultValue = "0") int page,
                                                    @RequestParam(value = "size", defaultValue = "30") int size) {
 
+        Long memberId = SecurityAspect.getCurrentMemberId();
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(memberService.getFollower(memberId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getFollower(targetMemberId, memberId, pageable));
     }
 
     /** 회원의 팔로워 리스트 조회 */
-    @GetMapping("/{memberId}/followees")
+    @GetMapping("/followees/{fromMemberId}/{memberId}")
     public ResponseEntity<?> getMemberFolloweeList(@PathVariable("memberId") Long memberId,
+                                                   @PathVariable("fromMemberId") Long fromMemberId,
                                                    @RequestParam(value = "page", defaultValue = "0") int page,
                                                    @RequestParam(value = "size", defaultValue = "30") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(memberService.getFollowee(memberId, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getFollowee(memberId, fromMemberId, pageable));
     }
 
     /** 팔로우를 신청받은 회원의 팔로우 요청 리스트 조회 */
@@ -89,6 +105,17 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getBlockList(memberId, pageable));
     }
 
+    /** 전체 회원 조회 */
+    @GetMapping("/{memberId}")
+    public ResponseEntity<?> getMembers(@PathVariable("memberId") Long memberId,
+                                        @RequestParam(value = "nickname") String nickname,
+                                        @RequestParam(value = "page", defaultValue = "0") int page,
+                                        @RequestParam(value = "size", defaultValue = "30") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getMemberList(nickname, memberId, pageable));
+    }
+
     /** 회원 정보 수정 */
     @PutMapping("{memberId}")
     public ResponseEntity<?> updateMember(@PathVariable("memberId") Long memberId,
@@ -97,7 +124,7 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body("회원수정에 성공했습니다.");
     }
 
-    /** 회원 프로필 상태 수정 */
+    /** 회원 공개 여부 상태 수정 */
     @PutMapping("/{memberId}/accountstatus")
     public ResponseEntity<?> updateMemberAccountStatus(@PathVariable("memberId") Long memberId) {
         memberService.updateMemberAccountStatus(memberId);
@@ -114,8 +141,37 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body("회원 프로필을 수정했습니다.");
     }
 
+    /** 로그인 */
+    @PublicApi
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+        String tokens = memberService.login(loginDto);
+        String[] splitTokens = tokens.split(":");
+        return ResponseEntity.status(HttpStatus.OK).body(LoginResponseDto.createLoginResponseDto(
+                "Bearer " + splitTokens[0], "Bearer " + splitTokens[1]));
+    }
+
+    /** 로그아웃 */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token, @RequestHeader("Refresh-Token") String refreshToken) {
+        String jwtToken = token.replace("Bearer ", "");
+        String jwtRefreshToken = refreshToken.replace("Bearer ", "");
+        memberService.logout(jwtToken, jwtRefreshToken);
+        return ResponseEntity.status(HttpStatus.OK).body("로그아웃에 성공했습니다.");
+    }
+
+    /** Access Token 재발급 */
+    @TokenApi
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshAccessToken(@RequestHeader("Refresh-Token") String refreshToken) {
+        String jwtRefreshToken = refreshToken.replace("Bearer ", "");
+        String newAccessToken = memberService.refreshAccessToken(jwtRefreshToken);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(RefreshTokenResponse.createDto("Bearer " + newAccessToken));
+    }
+
     /** 관리자 신청 승인 */
-    @PutMapping("/{memberId}/{targetId}/promotion")
+    @PutMapping("/promotion/{memberId}/{targetId}")
     public ResponseEntity<?> promotionAdmin(@PathVariable("memberId") Long memberId,
                                             @PathVariable("targetId") Long targetId) {
         memberService.promotionAdmin(targetId);
@@ -123,7 +179,7 @@ public class MemberController {
     }
 
     /** 관리자 권한 해제 */
-    @PutMapping("/{memberId}/{targetId}/relegation")
+    @PutMapping("/relegation/{memberId}/{targetId}")
     public ResponseEntity<?> relegationAdmin(@PathVariable("memberId") Long memberId,
                                              @PathVariable("targetId") Long targetId) {
         memberService.relegationAdmin(targetId);
@@ -131,18 +187,18 @@ public class MemberController {
     }
 
     /** 게시글 권한 해제 */
-    @PutMapping("/{memberId}/{targetId}/suspension")
+    @PutMapping("/suspension/{memberId}/{targetId}")
     public ResponseEntity<?> suspendedArticle(@PathVariable("memberId") Long memberId,
                                               @PathVariable("targetId") Long targetId) {
         memberService.suspendedArticle(targetId);
         return ResponseEntity.status(HttpStatus.OK).body("게시판 이용 권한을 중지했습니다.");
     }
 
-    /** 게시글 권한 승인 */
-    @PutMapping("/{memberId}/{targetId}/restart")
-    public ResponseEntity<?> restartArticle(@PathVariable("memberId") Long memberId,
-                                            @PathVariable("targetId") Long targetId) {
-        memberService.restartArticle(targetId);
+    /** 게시글 권한 재승인 */
+    @PutMapping("/enable/{memberId}/{targetId}")
+    public ResponseEntity<?> enableArticle(@PathVariable("memberId") Long memberId,
+                                           @PathVariable("targetId") Long targetId) {
+        memberService.enableArticle(targetId);
         return ResponseEntity.status(HttpStatus.OK).body("게시판 이용 권한을 재부여했습니다.");
     }
 }
