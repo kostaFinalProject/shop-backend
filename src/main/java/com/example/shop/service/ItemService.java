@@ -1,9 +1,7 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.shop.*;
-import com.example.shop.dto.item.ItemRequestDto;
-import com.example.shop.dto.item.ItemSizeDto;
-import com.example.shop.dto.item.ItemSummaryResponseDto;
+import com.example.shop.dto.item.*;
 import com.example.shop.repository.item.ItemRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +28,7 @@ public class ItemService {
     public void saveItem(ItemRequestDto dto, List<MultipartFile> itemImages) {
         ItemCategory itemCategory = validationService.validateItemCategoryByName(dto.getItemCategory());
 
-        if (validationService.existItemName(dto.getName())) {
+        if (validationService.existItemNameInItemCategory(dto.getItemCategory(), dto.getName())) {
             throw new IllegalArgumentException("이미 동일한 이름의 상품이 존재합니다.");
         }
 
@@ -52,7 +51,7 @@ public class ItemService {
         Item item = validationService.validateItemById(itemId);
         ItemCategory itemCategory = validationService.validateItemCategoryByName(dto.getItemCategory());
 
-        if (validationService.existItemNameExceptSelf(dto.getName(), itemId)) {
+        if (validationService.existItemNameInItemCategoryExceptSelf(dto.getItemCategory(), dto.getName(), itemId)) {
             throw new IllegalArgumentException("이미 동일한 이름의 상품이 존재합니다.");
         }
 
@@ -105,5 +104,23 @@ public class ItemService {
                 .toList();
 
         return new PageImpl<>(dtos, pageable, items.getTotalElements());
+    }
+
+    /** 상품 단건 조회 */
+    @Transactional(readOnly = true)
+    public ItemDetailResponseDto getItem(Long itemId) {
+        Item item = validationService.findItemById(itemId);
+
+        List<ItemSizeResponseDto> itemSizesDto = item.getItemSizes().stream()
+                .map(itemSize -> ItemSizeResponseDto.createDto(itemSize.getId(),
+                        itemSize.getSize().getSize(), itemSize.getStockQuantity()))
+                .toList();
+
+        List<String> itemImageUrls = item.getItemImages().stream()
+                .map(ItemImg::getImgUrl)
+                .toList();
+
+        return ItemDetailResponseDto.createDto(itemId, item.getItemCategory().getName(), item.getManufacturer(),
+                item.getName(), item.getPrice(), item.getSeller(), itemSizesDto, itemImageUrls);
     }
 }

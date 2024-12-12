@@ -2,13 +2,17 @@ package com.example.shop.service;
 
 import com.example.shop.domain.shop.ItemCategory;
 import com.example.shop.domain.shop.ItemCategoryImg;
+import com.example.shop.dto.item.ChildrenCategoryRequestDto;
 import com.example.shop.dto.item.ItemCategoryFormDto;
-import com.example.shop.repository.ItemCategoryRepository;
+import com.example.shop.dto.item.ParentCategoryRequestDto;
+import com.example.shop.repository.itemcategory.ItemCategoryRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +72,27 @@ public class ItemCategoryService {
         }
 
         itemCategory.updateItemCategory(dto.getName(), parentCategory, itemCategoryImg);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ParentCategoryRequestDto> getTopCategories() {
+        List<ItemCategory> categories = itemCategoryRepository.findCategoriesWithoutParentCategory();
+
+        return categories.stream()
+                .map(itemCategory ->
+                        ParentCategoryRequestDto.createDto(itemCategory.getId(),
+                                itemCategory.getName())).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChildrenCategoryRequestDto> getChildrenCategories(Long categoryId) {
+        List<ItemCategory> categories = itemCategoryRepository.findCategoriesByParentCategoryId(categoryId);
+
+        return categories.stream()
+                .map(itemCategory ->
+                        ChildrenCategoryRequestDto.createDto(itemCategory.getId(),
+                        itemCategory.getName(), itemCategory.getItemCategoryImg().getImgUrl()))
+                .toList();
     }
 
     @Transactional

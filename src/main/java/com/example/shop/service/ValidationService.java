@@ -12,6 +12,7 @@ import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.repository.commentlike.CommentLikeRepository;
 import com.example.shop.repository.follower.FollowerRepository;
 import com.example.shop.repository.item.ItemRepository;
+import com.example.shop.repository.itemcategory.ItemCategoryRepository;
 import com.example.shop.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -71,12 +72,17 @@ public class ValidationService {
                 .orElseThrow(() -> new IllegalArgumentException("등록된 상품이 없습니다."));
     }
 
-    public boolean existItemName(String itemName) {
-        return itemRepository.existsByName(itemName);
+    public Item findItemById(Long itemId) {
+        return itemRepository.findByItemId(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 상품이 없습니다."));
     }
 
-    public boolean existItemNameExceptSelf(String itemName, Long itemId) {
-        return itemRepository.existsByNameAndIdNot(itemName, itemId);
+    public boolean existItemNameInItemCategory(String category, String itemName) {
+        return itemRepository.existsNameInCategory(category, itemName);
+    }
+
+    public boolean existItemNameInItemCategoryExceptSelf(String category, String itemName, Long itemId) {
+        return itemRepository.existsNameInCategoryExceptMe(category, itemName, itemId);
     }
 
     public Size validateSizeBySize(String size) {

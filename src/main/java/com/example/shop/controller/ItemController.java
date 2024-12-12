@@ -38,6 +38,12 @@ public class ItemController {
         return ResponseEntity.status(HttpStatus.OK).body(itemService.getSearchItem(category, keyword, pageable));
     }
 
+    @PublicApi
+    @GetMapping("/{itemId}")
+    public ResponseEntity<?> getItem(@PathVariable("itemId") Long itemId) {
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem(itemId));
+    }
+
     @PutMapping("/{itemId}")
     public ResponseEntity<?> updateItem(@PathVariable("itemId") Long itemId,
                                         @RequestPart("item")ItemRequestDto dto,

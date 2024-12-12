@@ -78,7 +78,7 @@ mail:
     email: jhs990313@gmail.com
 
 file:
-  upload-dir: C://Users/JungHyunSu/uploads
+  upload-dir: C://Users/JungHyunSu/react/soccershop/public/uploads
 
 jwt:
   secret-key: u3Zs8XVDNlZ2RGF1Q0pYzJl2YXFKNENPWFZQaklxTjRaZ0NPaXpZUEtIQ3FTWnpTbGpYNW9EZEY=

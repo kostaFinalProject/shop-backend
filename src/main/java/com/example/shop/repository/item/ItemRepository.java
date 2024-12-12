@@ -8,6 +8,4 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> ,ItemRepositoryCustom {
-    boolean existsByName(String name);
-    boolean existsByNameAndIdNot(String name, Long id);
 }

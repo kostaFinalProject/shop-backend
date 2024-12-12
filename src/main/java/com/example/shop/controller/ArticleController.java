@@ -1,6 +1,7 @@
 package com.example.shop.controller;
 
 import com.example.shop.aop.PublicApi;
+import com.example.shop.aop.SecurityAspect;
 import com.example.shop.dto.instagram.article.ArticleRequestDto;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.service.ArticleService;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,33 +29,39 @@ public class ArticleController {
     private final ArticleService articleService;
 
     /** 게시글 생성 */
-    @PostMapping("/{memberId}")
-    public ResponseEntity<?> saveArticle(@PathVariable("memberId") Long memberId,
-                                         @RequestPart("article")ArticleRequestDto dto,
+    @PostMapping
+    public ResponseEntity<?> saveArticle(@RequestPart("article")ArticleRequestDto dto,
                                          @RequestPart("files") List<MultipartFile> files) {
 
+        Long memberId = SecurityAspect.getCurrentMemberId();
         articleService.saveArticle(memberId, dto, files);
         return ResponseEntity.status(HttpStatus.OK).body("게시글이 생성되었습니다.");
     }
 
     /** 게시글 댓글 생성 */
-    @PostMapping("/{memberId}/{articleId}")
-    public ResponseEntity<?> saveComment(@PathVariable("memberId") Long memberId,
-                                         @PathVariable("articleId") Long articleId,
+    @PostMapping("/{articleId}")
+    public ResponseEntity<?> saveComment(@PathVariable("articleId") Long articleId,
                                          @RequestPart("comment") CommentRequestDto dto,
                                          @RequestPart("file") MultipartFile file) {
+
+        Long memberId = SecurityAspect.getCurrentMemberId();
         articleService.saveComment(memberId, articleId, dto, file);
         return ResponseEntity.status(HttpStatus.OK).body("게시글 댓글이 생성되었습니다.");
     }
 
     /** 게시글 전체 조회 */
     @PublicApi
-    @GetMapping("/{memberId}")
-    public ResponseEntity<?> getArticles(@PathVariable(value = "memberId", required = false) Long memberId,
-                                         @RequestParam(value = "tag", required = false) String tag,
+    @GetMapping
+    public ResponseEntity<?> getArticles(@RequestParam(value = "tag", required = false) String tag,
                                          @RequestParam(value = "item", required = false) String item,
                                          @RequestParam(value = "page", defaultValue = "0") int page,
                                          @RequestParam(value = "size", defaultValue = "15") int size) {
+
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication == null || !authentication.isAuthenticated())) {
+            memberId = SecurityAspect.getCurrentMemberId();
+        }
 
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, tag, item, pageable));
@@ -60,19 +69,30 @@ public class ArticleController {
 
     /** 게시글 단건 조회 */
     @PublicApi
-    @GetMapping("/{memberId}/{articleId}")
-    public ResponseEntity<?> getArticle(@PathVariable(value = "memberId", required = false) Long memberId,
-                                        @PathVariable("articleId") Long articleId) {
+    @GetMapping("/{articleId}")
+    public ResponseEntity<?> getArticle(@PathVariable("articleId") Long articleId) {
+
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication == null || !authentication.isAuthenticated())) {
+            memberId = SecurityAspect.getCurrentMemberId();
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticle(memberId, articleId));
     }
 
     /** 게시글 댓글 조회 */
     @PublicApi
-    @GetMapping("/comments/{memberId}/{articleId}")
-    public ResponseEntity<?> getArticleComments(@PathVariable("memberId") Long memberId,
-                                                @PathVariable("articleId") Long articleId,
+    @GetMapping("/comments/{articleId}")
+    public ResponseEntity<?> getArticleComments(@PathVariable("articleId") Long articleId,
                                                 @RequestParam(value = "page", defaultValue = "0") int page,
                                                 @RequestParam(value = "size", defaultValue = "20") int size) {
+
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication == null || !authentication.isAuthenticated())) {
+            memberId = SecurityAspect.getCurrentMemberId();
+        }
 
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(articleService.getComments(memberId, articleId, pageable));

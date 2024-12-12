@@ -1,5 +1,6 @@
 package com.example.shop.controller;
 
+import com.example.shop.aop.SecurityAspect;
 import com.example.shop.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,29 +17,33 @@ public class LikeController {
 
     private final LikeService likeService;
 
-    @PostMapping("/articles/{memberId}/{articleId}")
-    public ResponseEntity<?> saveArticleLike(@PathVariable("memberId") Long memberId,
-                                             @PathVariable("articleId") Long articleId) {
+    @PostMapping("/articles/{articleId}")
+    public ResponseEntity<?> saveArticleLike(@PathVariable("articleId") Long articleId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         likeService.saveArticleLike(memberId, articleId);
         return ResponseEntity.status(HttpStatus.OK).body("좋아요를 눌렀습니다.");
     }
 
-    @PostMapping("/comments/{memberId}/{commentId}")
-    public ResponseEntity<?> saveCommentLike(@PathVariable("memberId") Long memberId,
-                                             @PathVariable("commentId") Long commentId) {
+    @PostMapping("/comments/{commentId}")
+    public ResponseEntity<?> saveCommentLike(@PathVariable("commentId") Long commentId) {
 
+        Long memberId = SecurityAspect.getCurrentMemberId();
         likeService.saveCommentLike(memberId, commentId);
         return ResponseEntity.status(HttpStatus.OK).body("좋아요를 눌렀습니다.");
     }
 
     @DeleteMapping("/articles/{articleLikeId}")
     public ResponseEntity<?> deleteArticleLike(@PathVariable("articleLikeId") Long articleLikeId) {
+
+        Long memberId = SecurityAspect.getCurrentMemberId();
         likeService.deleteArticleLike(articleLikeId);
         return ResponseEntity.status(HttpStatus.OK).body("좋아요를 취소했습니다.");
     }
 
     @DeleteMapping("/comments/{commentLikeId}")
     public ResponseEntity<?> deleteCommentLike(@PathVariable("commentLikeId") Long commentLikeId) {
+
+        Long memberId = SecurityAspect.getCurrentMemberId();
         likeService.deleteCommentLike(commentLikeId);
         return ResponseEntity.status(HttpStatus.OK).body("좋아요를 취소했습니다.");
     }

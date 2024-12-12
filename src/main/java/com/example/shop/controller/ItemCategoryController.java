@@ -1,5 +1,6 @@
 package com.example.shop.controller;
 
+import com.example.shop.aop.PublicApi;
 import com.example.shop.dto.item.ItemCategoryFormDto;
 import com.example.shop.service.ItemCategoryService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,18 @@ public class ItemCategoryController {
                                               @RequestPart("file") MultipartFile file) {
         itemCategoryService.saveItemCategory(dto, file);
         return ResponseEntity.status(HttpStatus.CREATED).body("상품 카테고리가 성공적으로 생성되었습니다.");
+    }
+
+    @PublicApi
+    @GetMapping
+    public ResponseEntity<?> getTopCategories() {
+        return ResponseEntity.ok(itemCategoryService.getTopCategories());
+    }
+
+    @PublicApi
+    @GetMapping("/{itemCategoryId}")
+    public ResponseEntity<?> getChildrenCategories(@PathVariable("itemCategoryId") Long itemCategoryId) {
+        return ResponseEntity.ok(itemCategoryService.getChildrenCategories(itemCategoryId));
     }
 
     @PutMapping("/{itemCategoryId}")
