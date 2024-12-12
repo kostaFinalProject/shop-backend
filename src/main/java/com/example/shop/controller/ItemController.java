@@ -1,6 +1,7 @@
 package com.example.shop.controller;
 
 import com.example.shop.aop.PublicApi;
+import com.example.shop.aop.SecurityAspect;
 import com.example.shop.dto.item.ItemRequestDto;
 import com.example.shop.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -48,24 +49,28 @@ public class ItemController {
     public ResponseEntity<?> updateItem(@PathVariable("itemId") Long itemId,
                                         @RequestPart("item")ItemRequestDto dto,
                                         @RequestPart("files")List<MultipartFile> files) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         itemService.updateItem(itemId, dto, files);
         return ResponseEntity.status(HttpStatus.OK).body("상품이 성공적으로 수정되었습니다.");
     }
 
-    @PutMapping("/{itemId}/active")
+    @PutMapping("/active/{itemId}")
     public ResponseEntity<?> activateItem(@PathVariable("itemId") Long itemId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         itemService.activateItem(itemId);
         return ResponseEntity.status(HttpStatus.OK).body("상품이 성공적으로 활성화 되었습니다.");
     }
 
-    @PutMapping("/{itemId}/inactive")
+    @PutMapping("/inactive/{itemId}]")
     public ResponseEntity<?> inactiveItem(@PathVariable("itemId") Long itemId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         itemService.inActiveItem(itemId);
         return ResponseEntity.status(HttpStatus.OK).body("상품이 성공적으로 비활성화 되었습니다.");
     }
 
     @DeleteMapping("/{itemId}")
     public ResponseEntity<?> deleteItem(@PathVariable("itemId") Long itemId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         itemService.deleteItem(itemId);
         return ResponseEntity.status(HttpStatus.OK).body("상품이 성공적으로 삭제되었습니다.");
     }

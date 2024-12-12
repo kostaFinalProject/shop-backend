@@ -15,11 +15,16 @@ public class ItemSummaryResponseDto {
     private String repImgUrl;
     private String itemStatus;
     private String seller;
+    private int discountPercent;
+    private int discountPrice;
 
     public static ItemSummaryResponseDto createDto(Long itemId, String itemCategory, String manufacturer,
-                                            String name, int price, String repImgUrl, String itemStatus, String seller) {
+                                            String name, int price, String repImgUrl,
+                                                   String itemStatus, String seller,
+                                                   int discountPercent, int discountPrice) {
 
         return ItemSummaryResponseDto.builder().itemId(itemId).itemCategory(itemCategory).manufacturer(manufacturer)
-                .name(name).price(price).repImgUrl(repImgUrl).itemStatus(itemStatus).seller(seller).build();
+                .name(name).price(price).repImgUrl(repImgUrl).itemStatus(itemStatus).seller(seller)
+                .discountPercent(discountPercent).discountPrice(discountPrice).build();
     }
 }

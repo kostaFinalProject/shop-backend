@@ -2,6 +2,7 @@ package com.example.shop.service;
 
 import com.example.shop.domain.shop.*;
 import com.example.shop.dto.item.*;
+import com.example.shop.repository.discount.DiscountRepository;
 import com.example.shop.repository.item.ItemRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final DiscountRepository discountRepository;
     private final ImageService itemImgService;
     private final ValidationService validationService;
 
@@ -99,8 +101,22 @@ public class ItemService {
         Page<Item> items = itemRepository.searchItems(category, keyword, pageable);
 
         List<ItemSummaryResponseDto> dtos = items.stream()
-                .map(item -> ItemSummaryResponseDto.createDto(item.getId(), item.getItemCategory().getName(), item.getManufacturer(), item.getName(),
-                        item.getPrice(), item.getRepItemImage(), item.getItemStatus().toString(), item.getSeller()))
+                .map(item -> {
+
+                    int discountPercent = 0;
+                    int discountPrice = item.getPrice();
+                    if (discountRepository.existsDiscountByItemId(item.getId())) {
+                        Discount discount = discountRepository.findDiscountByItemId(item.getId())
+                                .orElseThrow(() -> new IllegalArgumentException("할인 진행중이 아닙니다."));
+
+                        discountPercent = discount.getDiscountPercent();
+                        discountPrice = discount.getDiscountPrice();
+                    }
+
+                    return ItemSummaryResponseDto.createDto(item.getId(), item.getItemCategory().getName(),
+                            item.getManufacturer(), item.getName(), item.getPrice(), item.getRepItemImage(),
+                            item.getItemStatus().toString(), item.getSeller(), discountPercent, discountPrice);
+                })
                 .toList();
 
         return new PageImpl<>(dtos, pageable, items.getTotalElements());
@@ -120,7 +136,17 @@ public class ItemService {
                 .map(ItemImg::getImgUrl)
                 .toList();
 
+        int discountPercent = 0;
+        int discountPrice = item.getPrice();
+        if (discountRepository.existsDiscountByItemId(itemId)) {
+            Discount discount = discountRepository.findDiscountByItemId(item.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("할인 진행중이 아닙니다."));
+
+            discountPercent = discount.getDiscountPercent();
+            discountPrice = discount.getDiscountPrice();
+        }
+
         return ItemDetailResponseDto.createDto(itemId, item.getItemCategory().getName(), item.getManufacturer(),
-                item.getName(), item.getPrice(), item.getSeller(), itemSizesDto, itemImageUrls);
+                item.getName(), item.getPrice(), item.getSeller(), itemSizesDto, itemImageUrls, discountPercent, discountPrice);
     }
 }

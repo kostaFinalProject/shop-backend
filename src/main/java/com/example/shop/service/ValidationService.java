@@ -1,6 +1,7 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
+import com.example.shop.domain.shop.Discount;
 import com.example.shop.domain.shop.Item;
 import com.example.shop.domain.shop.ItemCategory;
 import com.example.shop.domain.shop.Size;
@@ -10,6 +11,7 @@ import com.example.shop.repository.articlelike.ArticleLikeRepository;
 import com.example.shop.repository.block.BlockRepository;
 import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.repository.commentlike.CommentLikeRepository;
+import com.example.shop.repository.discount.DiscountRepository;
 import com.example.shop.repository.follower.FollowerRepository;
 import com.example.shop.repository.item.ItemRepository;
 import com.example.shop.repository.itemcategory.ItemCategoryRepository;
@@ -36,6 +38,7 @@ public class ValidationService {
     private final CommentLikeRepository commentLikeRepository;
     private final ArticleCollectionRepository articleCollectionRepository;
     private final BlockRepository blockRepository;
+    private final DiscountRepository discountRepository;
 
     public Member validateMemberById(Long memberId) {
         return memberRepository.findById(memberId)
@@ -75,6 +78,11 @@ public class ValidationService {
     public Item findItemById(Long itemId) {
         return itemRepository.findByItemId(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 상품이 없습니다."));
+    }
+
+    public Discount validateDiscountById(Long discountId) {
+        return discountRepository.findById(discountId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 할인이 없습니다."));
     }
 
     public boolean existItemNameInItemCategory(String category, String itemName) {
