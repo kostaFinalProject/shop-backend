@@ -66,6 +66,8 @@ public class SecurityConfig {
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.GET, "api/v1/articles").permitAll()
                                 .requestMatchers(HttpMethod.GET, "api/v1/articles/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "api/v1/articles").hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.GET, "/error").permitAll())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->

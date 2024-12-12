@@ -2,9 +2,11 @@ package com.example.shop.controller;
 
 import com.example.shop.aop.PublicApi;
 import com.example.shop.aop.SecurityAspect;
+import com.example.shop.config.CustomUserDetails;
 import com.example.shop.dto.instagram.article.ArticleRequestDto;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.service.ArticleService;
+import com.example.shop.service.ValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import java.util.List;
 public class ArticleController {
 
     private final ArticleService articleService;
+    private final ValidationService validationService;
 
     /** 게시글 생성 */
     @PostMapping
@@ -59,9 +62,14 @@ public class ArticleController {
 
         Long memberId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!(authentication == null || !authentication.isAuthenticated())) {
-            memberId = SecurityAspect.getCurrentMemberId();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
         }
+
+        System.out.println("memberId = " + memberId);
 
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, tag, item, pageable));
@@ -74,10 +82,12 @@ public class ArticleController {
 
         Long memberId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!(authentication == null || !authentication.isAuthenticated())) {
-            memberId = SecurityAspect.getCurrentMemberId();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
         }
-
         return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticle(memberId, articleId));
     }
 
@@ -90,10 +100,12 @@ public class ArticleController {
 
         Long memberId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!(authentication == null || !authentication.isAuthenticated())) {
-            memberId = SecurityAspect.getCurrentMemberId();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
         }
-
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(articleService.getComments(memberId, articleId, pageable));
     }

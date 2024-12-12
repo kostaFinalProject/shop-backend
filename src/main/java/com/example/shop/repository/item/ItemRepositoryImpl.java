@@ -57,11 +57,11 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     public Page<Item> searchItems(String category, String keyword, Pageable pageable) {
         BooleanExpression keywordCondition = hasKeyword(keyword);
         BooleanExpression categoryCondition = hasCategory(category);
+        BooleanExpression commonCondition = item.itemStatus.eq(ItemStatus.ACTIVE)
+                .or(item.itemStatus.eq(ItemStatus.SOLD_OUT));
 
         List<Item> content = queryFactory.selectFrom(item)
-                .where(item.itemStatus.eq(ItemStatus.ACTIVE)
-                        .or(item.itemStatus.eq(ItemStatus.SOLD_OUT))
-                        .and(combineConditions(keywordCondition, categoryCondition)))
+                .where(combineConditions(commonCondition,keywordCondition, categoryCondition))
                 .orderBy(item.createAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -69,10 +69,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
         JPAQuery<Long> countQuery = queryFactory.select(item.count())
                 .from(item)
-                .where(combineConditions(keywordCondition, categoryCondition)
-                        .and(item.itemStatus.eq(ItemStatus.ACTIVE)
-                                .or(item.itemStatus.eq(ItemStatus.SOLD_OUT))
-                        ));
+                .where(combineConditions(commonCondition,keywordCondition, categoryCondition));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
