@@ -58,7 +58,7 @@ public class ArticleController {
     public ResponseEntity<?> getArticles(@RequestParam(value = "tag", required = false) String tag,
                                          @RequestParam(value = "item", required = false) String item,
                                          @RequestParam(value = "page", defaultValue = "0") int page,
-                                         @RequestParam(value = "size", defaultValue = "15") int size) {
+                                         @RequestParam(value = "size", defaultValue = "12") int size) {
 
         Long memberId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -111,39 +111,35 @@ public class ArticleController {
     }
 
     /** 게시글 수정 (작성자 & 관리자 등급만 가능) */
-    @PutMapping("/{memberId}/{articleId}")
-    public ResponseEntity<?> updateArticle(@PathVariable("memberId") Long memberId,
-                                           @PathVariable("articleId") Long articleId,
+    @PutMapping("{articleId}")
+    public ResponseEntity<?> updateArticle(@PathVariable("articleId") Long articleId,
                                            @RequestPart("article")ArticleRequestDto dto,
                                            @RequestPart("files") List<MultipartFile> files) {
-
+        Long memberId = SecurityAspect.getCurrentMemberId();
         articleService.updateArticle(memberId, articleId, dto, files);
         return ResponseEntity.status(HttpStatus.OK).body("게시글이 수정되었습니다.");
     }
 
     /** 게시글 활성화 (관리자 기능) */
-    @PutMapping("/active/{memberId}/{articleId}")
-    public ResponseEntity<?> activeArticle(@PathVariable("memberId") Long memberId,
-                                             @PathVariable("articleId") Long articleId) {
-
+    @PutMapping("/active/{articleId}")
+    public ResponseEntity<?> activeArticle(@PathVariable("articleId") Long articleId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         articleService.activeArticle(memberId, articleId);
         return ResponseEntity.status(HttpStatus.OK).body("게시글이 활성화 되었습니다.");
     }
 
     /** 게시글 비활성화 (관리자 기능) */
-    @PutMapping("/inactive/{memberId}/{articleId}")
-    public ResponseEntity<?> inactiveArticle(@PathVariable("memberId") Long memberId,
-                                             @PathVariable("articleId") Long articleId) {
-
+    @PutMapping("/inactive/{articleId}")
+    public ResponseEntity<?> inactiveArticle(@PathVariable("articleId") Long articleId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         articleService.inactiveArticle(memberId, articleId);
         return ResponseEntity.status(HttpStatus.OK).body("게시글이 비활성화 되었습니다.");
     }
 
     /** 게시글 삭제 (작성자 or 관리자만 가능) */
-    @DeleteMapping("/{memberId}/{articleId}")
-    public ResponseEntity<?> deleteArticle(@PathVariable("memberId") Long memberId,
-                                           @PathVariable("articleId") Long articleId) {
-
+    @DeleteMapping("/{articleId}")
+    public ResponseEntity<?> deleteArticle(@PathVariable("articleId") Long articleId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         articleService.deleteArticle(memberId, articleId);
         return ResponseEntity.status(HttpStatus.OK).body("게시글이 삭제되었습니다.");
     }

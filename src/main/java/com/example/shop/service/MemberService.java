@@ -93,9 +93,18 @@ public class MemberService {
                 .map(article -> {
                     Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), fromMemberId);
 
-                    return ArticleSummaryResponseDto.createDto(article.getId(), targetMemberId, article.getMember().getNickname(),
-                            article.getArticleImages().get(0).getImgUrl(),
-                            article.getContent(), article.getLikes(), article.getViewCounts(), likeId);
+                    String memberProfileImageUrl = null;
+                    if (article.getMember().getMemberProfileImg() != null) {
+                        memberProfileImageUrl = article.getMember().getMemberProfileImg().getImgUrl();
+                    }
+
+                    List<String> hashTags = article.getArticleTags().stream()
+                            .map(articleTag -> articleTag.getTag().getTag())
+                            .toList();
+
+                    return ArticleSummaryResponseDto.createDto(article.getId(), targetMemberId,
+                            article.getMember().getNickname(), memberProfileImageUrl,article.getArticleImages().get(0).getImgUrl(),
+                            article.getContent(), article.getLikes(), article.getViewCounts(),likeId, hashTags);
                 })
                 .toList();
 
