@@ -3,7 +3,6 @@ package com.example.shop.service;
 import com.example.shop.domain.shop.Discount;
 import com.example.shop.domain.shop.Item;
 import com.example.shop.dto.item.DiscountRequestDto;
-import com.example.shop.dto.item.DiscountUpdateDto;
 import com.example.shop.repository.discount.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
