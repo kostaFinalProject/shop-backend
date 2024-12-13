@@ -39,12 +39,10 @@ public class ArticleLikeRepositoryImpl implements ArticleLikeRepositoryCustom{
     }
 
     @Override
-    public Optional<ArticleLike> findArticleLikeWithArticleAndMemberById(Long articleLikeId) {
+    public Optional<ArticleLike> findArticleLikeById(Long articleLikeId) {
 
         ArticleLike result = queryFactory.selectFrom(articleLike)
-                .join(articleLike.article, article).fetchJoin()
-                .join(articleLike.member, member).fetchJoin()
-                .where(articleLike.article.id.eq(articleLikeId))
+                .where(articleLike.id.eq(articleLikeId))
                 .fetchOne();
 
         return Optional.ofNullable(result);

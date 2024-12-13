@@ -1,7 +1,9 @@
 package com.example.shop.service;
 
+import com.example.shop.config.CustomOAuth2UserService;
 import com.example.shop.domain.instagram.*;
 import com.example.shop.dto.login.LoginDto;
+import com.example.shop.dto.login.OAuthLoginDto;
 import com.example.shop.dto.member.*;
 import com.example.shop.dto.instagram.article.ArticleSummaryResponseDto;
 import com.example.shop.repository.member.MemberRepository;
@@ -11,11 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class MemberService {
     private final ValidationService validationService;
     private final ImageService imageService;
     private final TokenService tokenService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     /** 회원 가입 */
     @Transactional
@@ -78,9 +83,20 @@ public class MemberService {
     public MemberResponseDto getMemberInfo(Long memberId) {
         Member findMember = validationService.validateMemberById(memberId);
 
+        String phone = findMember.getPhone();
+        String postCode = null;
+        String roadAddress = null;
+        String detailAddress = null;
+
+        if (findMember.getAddress() != null) {
+            postCode = findMember.getAddress().getPostCode();
+            roadAddress = findMember.getAddress().getRoadAddress();
+            detailAddress = findMember.getAddress().getDetailAddress();
+        }
+
         return MemberResponseDto.createDto(findMember.getId(), findMember.getName(), findMember.getNickname(),
-                findMember.getEmail(), findMember.getPhone(), findMember.getAddress().getPostCode(),
-                findMember.getAddress().getRoadAddress(), findMember.getAddress().getDetailAddress());
+                findMember.getEmail(), phone, postCode,
+                roadAddress, detailAddress, findMember.getGrade().name());
     }
 
     /** 회원의 게시물 조회 (프로필 비공개 시 팔로우 해야만 조회 가능) */
@@ -208,6 +224,24 @@ public class MemberService {
         if (!bCryptPasswordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
+
+        String accessToken = tokenService.generateAccessToken(member.getUserId());
+        String refreshToken = tokenService.generateRefreshToken(member.getUserId());
+
+        return accessToken + ":" + refreshToken;
+    }
+
+    @Transactional
+    public String oauthLogin(OAuthLoginDto loginDto) {
+        OAuth2User oAuth2User = customOAuth2UserService.loadUserFromKakao(loginDto.getAccessToken());
+
+        Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
+        String email = kakaoAccount.get("email").toString();
+        String provider = "kakao";
+        Provider providerEnum = Provider.valueOf(provider.toUpperCase());
+
+        Member member = memberRepository.findByEmailAndProvider(email, providerEnum)
+                .orElseGet(() -> customOAuth2UserService.createSocialMember(email, providerEnum));
 
         String accessToken = tokenService.generateAccessToken(member.getUserId());
         String refreshToken = tokenService.generateRefreshToken(member.getUserId());

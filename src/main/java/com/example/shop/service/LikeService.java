@@ -16,7 +16,7 @@ public class LikeService {
     private final ValidationService validationService;
 
     @Transactional
-    public void saveArticleLike(Long memberId, Long articleId) {
+    public Long saveArticleLike(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);
         Article article = validationService.validateArticleById(articleId);
 
@@ -25,11 +25,12 @@ public class LikeService {
         }
 
         ArticleLike articleLike = ArticleLike.createArticleLike(member, article);
-        articleLikeRepository.save(articleLike);
+        ArticleLike savedArticleLike = articleLikeRepository.save(articleLike);
+        return savedArticleLike.getId();
     }
 
     @Transactional
-    public void saveCommentLike(Long memberId, Long commentId) {
+    public Long saveCommentLike(Long memberId, Long commentId) {
         Member member = validationService.validateMemberById(memberId);
         Comment comment = validationService.validateCommentById(commentId);
 
@@ -38,19 +39,20 @@ public class LikeService {
         }
 
         CommentLike commentLike = CommentLike.createCommentLike(member, comment);
-        commentLikeRepository.save(commentLike);
+        CommentLike savedCommentLike = commentLikeRepository.save(commentLike);
+        return savedCommentLike.getId();
     }
 
     @Transactional
     public void deleteArticleLike(Long articleLikeId) {
-        ArticleLike articleLike = validationService.findArticleLikeWithArticleAndMember(articleLikeId);
+        ArticleLike articleLike = validationService.findArticleLikeById(articleLikeId);
         articleLike.cancelLike();
         articleLikeRepository.delete(articleLike);
     }
 
     @Transactional
     public void deleteCommentLike(Long commentLikeId) {
-        CommentLike commentLike = validationService.findCommentLikeWithCommentAndMemberById(commentLikeId);
+        CommentLike commentLike = validationService.findCommentLikeById(commentLikeId);
         commentLike.cancelLike();
         commentLikeRepository.delete(commentLike);
     }

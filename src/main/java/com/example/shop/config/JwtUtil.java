@@ -32,7 +32,7 @@ public class JwtUtil {
 
     // Access Token 발급 (기본 만료 시간: 15분)
     public String generateToken(String email) {
-        return generateToken(email, 1000 * 60 * 15);
+        return generateToken(email, 1000 * 60 * 1);
     }
 
     // Refresh Token 발급 (기본 만료 시간: 7일)
@@ -43,9 +43,9 @@ public class JwtUtil {
     }
 
     // JWT Token 생성
-    private String generateToken(String email, long expiration) {
+    private String generateToken(String userId, long expiration) {
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(userId)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSecretKey())
@@ -79,7 +79,6 @@ public class JwtUtil {
         }
     }
 
-    // 토큰에서 이메일(사용자 정보) 추출
     public String extractUsername(String token) {
         try {
             return Jwts.parserBuilder()

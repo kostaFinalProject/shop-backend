@@ -10,12 +10,12 @@ public class TokenService {
 
     private final JwtUtil jwtUtil;
 
-    public String generateAccessToken(String email) {
-        return jwtUtil.generateToken(email);
+    public String generateAccessToken(String userId) {
+        return jwtUtil.generateToken(userId);
     }
 
-    public String generateRefreshToken(String email) {
-        return jwtUtil.generateRefreshToken(email);
+    public String generateRefreshToken(String userId) {
+        return jwtUtil.generateRefreshToken(userId);
     }
 
     public boolean validateAccessToken(String token) {

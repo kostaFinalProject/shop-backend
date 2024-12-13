@@ -147,13 +147,13 @@ public class ValidationService {
         return commentLikeRepository.findCommentLikeIdByCommentAndMember(commentId, memberId);
     }
 
-    public ArticleLike findArticleLikeWithArticleAndMember(Long articleLikeId) {
-        return articleLikeRepository.findArticleLikeWithArticleAndMemberById(articleLikeId)
+    public ArticleLike findArticleLikeById(Long articleLikeId) {
+        return articleLikeRepository.findArticleLikeById(articleLikeId)
                 .orElseThrow(() -> new IllegalArgumentException("좋아요를 누르지 않은 게시글입니다."));
     }
 
-    public CommentLike findCommentLikeWithCommentAndMemberById(Long commentLikeId) {
-        return commentLikeRepository.findCommentLikeWithCommentAndMemberById(commentLikeId)
+    public CommentLike findCommentLikeById(Long commentLikeId) {
+        return commentLikeRepository.findCommentLikeById(commentLikeId)
                 .orElseThrow(() -> new IllegalArgumentException("좋아요를 누르지 않은 댓글입니다."));
     }
 

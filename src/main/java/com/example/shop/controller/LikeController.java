@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * Spring Security 적용하면 @PathVariable("memberId") 제거
  */
@@ -20,16 +22,16 @@ public class LikeController {
     @PostMapping("/articles/{articleId}")
     public ResponseEntity<?> saveArticleLike(@PathVariable("articleId") Long articleId) {
         Long memberId = SecurityAspect.getCurrentMemberId();
-        likeService.saveArticleLike(memberId, articleId);
-        return ResponseEntity.status(HttpStatus.OK).body("좋아요를 눌렀습니다.");
+        Long likeId = likeService.saveArticleLike(memberId, articleId);
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("likeId", likeId));
     }
 
     @PostMapping("/comments/{commentId}")
     public ResponseEntity<?> saveCommentLike(@PathVariable("commentId") Long commentId) {
 
         Long memberId = SecurityAspect.getCurrentMemberId();
-        likeService.saveCommentLike(memberId, commentId);
-        return ResponseEntity.status(HttpStatus.OK).body("좋아요를 눌렀습니다.");
+        Long likeId = likeService.saveCommentLike(memberId, commentId);
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("likeId", likeId));
     }
 
     @DeleteMapping("/articles/{articleLikeId}")

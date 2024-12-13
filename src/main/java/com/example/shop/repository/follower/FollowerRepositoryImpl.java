@@ -46,16 +46,20 @@ public class FollowerRepositoryImpl implements FollowerRepositoryCustom{
     }
 
     @Override
-    public boolean existsFollowerWithFolloweeAndFollower(Member followee, Member follower) {
+    public boolean existsFollowerWithFolloweeAndFollower(Long followeeId, Long followerId) {
+        if (followeeId == null) {
+            return false;
+        }
+
         QMember followeeMember = new QMember("followeeMember");
         QMember followerMember = new QMember("followerMember");
 
-        return queryFactory.selectOne()
+        return queryFactory.select(follower1)
                 .from(follower1)
                 .join(follower1.followee, followeeMember).fetchJoin()
                 .join(follower1.follower, followerMember).fetchJoin()
-                .where(follower1.followee.eq(follower)
-                        .and(follower1.follower.eq(followee)))
+                .where(follower1.followee.id.eq(followerId)
+                        .and(follower1.follower.id.eq(followeeId)))
                 .fetchOne() != null;
     }
 }

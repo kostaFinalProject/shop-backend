@@ -3,16 +3,21 @@ package com.example.shop.controller;
 import com.example.shop.aop.PublicApi;
 import com.example.shop.aop.SecurityAspect;
 import com.example.shop.aop.TokenApi;
+import com.example.shop.config.CustomUserDetails;
 import com.example.shop.dto.login.LoginDto;
 import com.example.shop.dto.login.LoginResponseDto;
+import com.example.shop.dto.login.OAuthLoginDto;
 import com.example.shop.dto.login.RefreshTokenResponse;
 import com.example.shop.dto.member.*;
 import com.example.shop.service.MemberService;
+import com.example.shop.service.ValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ValidationService validationService;
 
     /** 회원 가입 */
     @PublicApi
@@ -106,12 +112,20 @@ public class MemberController {
     }
 
     /** 차단자를 제외한 전체 회원 조회 */
+    @PublicApi
     @GetMapping("/all")
     public ResponseEntity<?> getMembers(@RequestParam(value = "nickname") String nickname,
                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                         @RequestParam(value = "size", defaultValue = "30") int size) {
 
-        Long memberId = SecurityAspect.getCurrentMemberId();
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
+        }
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getMemberList(nickname, memberId, pageable));
     }
@@ -147,6 +161,15 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         String tokens = memberService.login(loginDto);
+        String[] splitTokens = tokens.split(":");
+        return ResponseEntity.status(HttpStatus.OK).body(LoginResponseDto.createLoginResponseDto(
+                "Bearer " + splitTokens[0], "Bearer " + splitTokens[1]));
+    }
+
+    @PublicApi
+    @PostMapping("/oauth/login")
+    public ResponseEntity<?> oauthLogin(@RequestBody OAuthLoginDto loginDto) {
+        String tokens = memberService.oauthLogin(loginDto);
         String[] splitTokens = tokens.split(":");
         return ResponseEntity.status(HttpStatus.OK).body(LoginResponseDto.createLoginResponseDto(
                 "Bearer " + splitTokens[0], "Bearer " + splitTokens[1]));

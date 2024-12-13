@@ -3,14 +3,13 @@ package com.example.shop.service;
 import com.example.shop.domain.instagram.*;
 import com.example.shop.domain.shop.Item;
 import com.example.shop.dto.instagram.article.ArticleDetailResponseDto;
-import com.example.shop.dto.instagram.article.ArticleItemResponseDto;
 import com.example.shop.dto.instagram.article.ArticleRequestDto;
 import com.example.shop.dto.instagram.article.ArticleSummaryResponseDto;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
 import com.example.shop.dto.instagram.comment.CommentResponseDto;
-import com.example.shop.exception.NotFoundException;
 import com.example.shop.repository.article.ArticleRepository;
 import com.example.shop.repository.comment.CommentRepository;
+import com.example.shop.repository.follower.FollowerRepository;
 import com.example.shop.service.image.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +27,7 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final CommentRepository commentRepository;
+    private final FollowerRepository followerRepository;
     private final ImageService imageService;
     private final ValidationService validationService;
 
@@ -120,6 +120,23 @@ public class ArticleService {
 
         article.incrementViewCounts();
 
+        boolean isFollow = followerRepository.existsFollowerWithFolloweeAndFollower(memberId, article.getMember().getId());
+        String following;
+        if (isFollow) {
+            following = "Follower";
+        } else {
+            if (article.getMember().getId().equals(memberId)) {
+                following = "Me";
+            } else {
+                following = "Not Follower";
+            }
+        }
+
+        String memberProfileImageUrl = null;
+        if (article.getMember().getMemberProfileImg() != null) {
+            memberProfileImageUrl = article.getMember().getMemberProfileImg().getImgUrl();
+        }
+
         List<String> articleImages = article.getArticleImages().stream()
                 .map(ArticleImg::getImgUrl)
                 .toList();
@@ -128,15 +145,11 @@ public class ArticleService {
                 .map(articleTag -> articleTag.getTag().getTag())
                 .toList();
 
-        List<ArticleItemResponseDto> items = article.getArticleItems().stream()
-                .map(articleItem -> ArticleItemResponseDto.createDto(articleItem.getItem().getId(), articleItem.getItem().getName(),
-                        articleItem.getItem().getPrice(), articleItem.getItem().getRepItemImage())).toList();
-
         long articleCommentsCount = commentRepository.countByArticleId(articleId);
         Long likeId = validationService.findArticleLikeIdByArticleAndMember(articleId, memberId);
 
         return ArticleDetailResponseDto.createDto(articleId, article.getMember().getId(), article.getMember().getNickname(),
-                articleImages, hashTags, items, article.getLikes(), articleCommentsCount, likeId);
+                memberProfileImageUrl, articleImages, hashTags, article.getContent(), following, article.getLikes(), articleCommentsCount, likeId, article.getCreateAt());
     }
 
     /** 게시글 전체 조회 */

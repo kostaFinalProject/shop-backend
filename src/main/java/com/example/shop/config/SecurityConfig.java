@@ -28,6 +28,9 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -50,9 +53,11 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/v1/members/check-id").permitAll()
                                 .requestMatchers(HttpMethod.POST, "api/v1/members/check-nickname").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/v1/members/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/members/oauth/login").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/api/v1/members/refresh-token").permitAll()
                                 .requestMatchers(HttpMethod.GET, "api/v1/members").authenticated()
                                 .requestMatchers(HttpMethod.POST,"/api/v1/members/logout").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/members/articles/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/tokens/validate").authenticated()
                                 .requestMatchers(HttpMethod.GET, "api/v1/item-categories").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/item-categories/*").permitAll()
@@ -75,7 +80,18 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/error").permitAll()
                                 .requestMatchers(HttpMethod.POST, "api/v1/discounts/**")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "api/v1/likes/**")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
+                                .requestMatchers(HttpMethod.DELETE, "api/v1/likes/**")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.PUT, "api/v1/members/account-status").authenticated())
+                .oauth2Login(oauth ->
+                        oauth
+                                .loginPage("http://localhost:3000/login")
+                                .userInfoEndpoint(c -> c.userService(customOAuth2UserService))
+                                .successHandler(oAuth2AuthenticationSuccessHandler)
+                                .failureHandler(oAuth2AuthenticationFailureHandler)
+                )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

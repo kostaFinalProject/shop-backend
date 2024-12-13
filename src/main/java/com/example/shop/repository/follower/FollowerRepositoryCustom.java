@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface FollowerRepositoryCustom {
     Optional<Follower> findFollowerWithFolloweeAndFollowerById(Long followerId);
     Optional<Follower> findFollowerWithFolloweeAndFollower(Member followee, Member follower);
-    boolean existsFollowerWithFolloweeAndFollower(Member followee, Member follower);
+    boolean existsFollowerWithFolloweeAndFollower(Long followeeId, Long followerId);
 }

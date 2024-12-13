@@ -54,6 +54,23 @@ spring:
     resources:
       static-locations: classpath:/static/, file:/uploads/
 
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: 213a60178962aceb34ac95e150908e3e
+            client-secret: oFS9RqjEQ0XPtTPzw3jLcgeQMjItBBEt
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:3000/login/oauth2/callback/kakao
+            client-authentication-method: POST
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
 #logging:
 #  level:
 #    org.hibernate: DEBUG

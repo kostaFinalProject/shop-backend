@@ -38,10 +38,8 @@ public class CommentLikeRepositoryImpl implements CommentLikeRepositoryCustom {
     }
 
     @Override
-    public Optional<CommentLike> findCommentLikeWithCommentAndMemberById(Long commentLikeId) {
+    public Optional<CommentLike> findCommentLikeById(Long commentLikeId) {
         CommentLike result = queryFactory.selectFrom(commentLike)
-                .join(commentLike.comment, comment).fetchJoin()
-                .join(commentLike.member, member).fetchJoin()
                 .where(commentLike.id.eq(commentLikeId))
                 .fetchOne();
 

@@ -7,5 +7,5 @@ import java.util.Optional;
 public interface ArticleLikeRepositoryCustom {
     boolean existsByArticleAndMemberById(Long articleId, Long memberId);
     Long findArticleLikeIdByArticleAndMember(Long articleId, Long memberId);
-    Optional<ArticleLike> findArticleLikeWithArticleAndMemberById(Long articleLikeId);
+    Optional<ArticleLike> findArticleLikeById(Long articleLikeId);
 }

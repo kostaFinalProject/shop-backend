@@ -15,12 +15,14 @@ public class MemberResponseDto {
     private String postCode;
     private String roadAddress;
     private String detailAddress;
+    private String grade;
 
     public static MemberResponseDto createDto(Long memberId, String name, String nickname,
-                                              String email, String phone,
-                                              String postCode, String roadAddress, String detailAddress) {
+                                              String email, String phone, String postCode,
+                                              String roadAddress, String detailAddress, String grade) {
 
         return MemberResponseDto.builder().memberId(memberId).name(name).nickname(nickname)
-                .email(email).phone(phone).postCode(postCode).roadAddress(roadAddress).detailAddress(detailAddress).build();
+                .email(email).phone(phone).postCode(postCode).roadAddress(roadAddress)
+                .detailAddress(detailAddress).grade(grade).build();
     }
 }
