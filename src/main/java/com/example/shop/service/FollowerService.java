@@ -16,7 +16,7 @@ public class FollowerService {
     private final ValidationService validationService;
 
     @Transactional
-    public void follow(Long memberId, Long followerId) {
+    public Long follow(Long memberId, Long followerId) {
         if (memberId.equals(followerId)) {
             throw new IllegalArgumentException("자기 자신은 팔로우를 할 수 없습니다.");
         }
@@ -38,7 +38,8 @@ public class FollowerService {
             reversFollower.updateFollowerStatus(FollowerStatus.ACCEPTED);
         }
 
-        followerRepository.save(follower);
+        Follower save = followerRepository.save(follower);
+        return save.getId();
     }
 
     /** 맞팔로우 수락 */

@@ -54,7 +54,14 @@ public class MemberController {
                                                @RequestParam(value = "page", defaultValue = "0") int page,
                                                @RequestParam(value = "size", defaultValue = "15") int size) {
 
-        Long memberId = SecurityAspect.getCurrentMemberId();
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
+        }
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getArticle(targetId, memberId, pageable));
     }
@@ -128,6 +135,42 @@ public class MemberController {
         }
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getMemberList(nickname, memberId, pageable));
+    }
+
+    /** 회원 프로필 조회 */
+    @PublicApi
+    @GetMapping("/profile/{targetId}")
+    public ResponseEntity<?> getMemberProfile(@PathVariable("targetId") Long targetId) {
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getMemberProfile(targetId, memberId));
+    }
+
+    /** 회원 태그 상품 조회 */
+    @PublicApi
+    @GetMapping("/items/{targetId}")
+    public ResponseEntity<?> getMemberItem(@PathVariable("targetId") Long targetId,
+                                           @RequestParam(value = "page", defaultValue = "0") int page,
+                                           @RequestParam(value = "size", defaultValue = "30") int size) {
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getArticleItems(targetId, memberId, pageable));
     }
 
     /** 회원 정보 수정 */

@@ -1,6 +1,7 @@
 package com.example.shop.repository.member;
 
 import com.example.shop.domain.instagram.*;
+import com.example.shop.domain.shop.Item;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,4 +17,5 @@ public interface MemberRepositoryCustom {
     Page<Member> findMembersByNickName(String nickName, Long fromMemberId, Pageable pageable);
     boolean duplicateMember(String userId, String nickname, String email);
     Optional<Member> findByEmailAndProvider(String email, Provider provider);
+    Page<Item> findTaggedItemsByMemberId(Long targetMemberId, Long fromMemberId, Pageable pageable);
 }

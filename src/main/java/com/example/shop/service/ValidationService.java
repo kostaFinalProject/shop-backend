@@ -165,4 +165,8 @@ public class ValidationService {
         return blockRepository.findBlockWithFromMemberAndToMemberById(blockId)
                 .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 차단 정보입니다."));
     }
+
+    public Follower findFollowerByFolloweeIdAndFollowerId(Long followeeId, Long followerId) {
+        return followerRepository.findByFolloweeIdAndFollowerId(followeeId, followerId);
+    }
 }

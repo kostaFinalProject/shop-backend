@@ -32,20 +32,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String provider = userRequest.getClientRegistration().getRegistrationId();
-        String email = (String) ((Map<String, Object>) oAuth2User.getAttributes().get("kakao_account")).get("email");
-
         Provider providerEnum = Provider.valueOf(provider.toUpperCase());
+
+        String email = extractEmail(oAuth2User, provider);
+
         Member member = memberRepository.findByEmailAndProvider(email, providerEnum)
                 .orElseGet(() -> createSocialMember(email, providerEnum));
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("USER")),
                 oAuth2User.getAttributes(),
-                "id");
+                "id"
+        );
     }
 
-    public OAuth2User loadUserFromKakao(String accessToken) {
-        String url = "https://kapi.kakao.com/v2/user/me";
+    public OAuth2User loadUserFromProvider(String accessToken, String provider) {
+        String url = getUserInfoUri(provider);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -56,18 +58,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("USER")),
                 attributes,
-                "id");
+                "id"
+        );
     }
 
     public Member createSocialMember(String email, Provider provider) {
-
         String userId = RandomStringUtils.randomAlphanumeric(8);
-        String nickname = "Kakao_" + RandomStringUtils.randomAlphanumeric(8);
+        String nickname = provider.name() + "_" + RandomStringUtils.randomAlphanumeric(8);
 
         Member newMember = Member.createMember(
                 userId,
                 null,
-                provider.toString() + " USER",
+                provider.name() + " USER",
                 nickname,
                 email,
                 null,
@@ -77,5 +79,33 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         );
 
         return memberRepository.save(newMember);
+    }
+
+    private String extractEmail(OAuth2User oAuth2User, String provider) {
+        switch (provider) {
+            case "kakao":
+                Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
+                return kakaoAccount.get("email").toString();
+            case "naver":
+                Map<String, Object> response = (Map<String, Object>) oAuth2User.getAttributes().get("response");
+                return response.get("email").toString();
+            case "google":
+                return oAuth2User.getAttributes().get("email").toString();
+            default:
+                throw new IllegalArgumentException("Unsupported provider: " + provider);
+        }
+    }
+
+    private String getUserInfoUri(String provider) {
+        switch (provider) {
+            case "kakao":
+                return "https://kapi.kakao.com/v2/user/me";
+            case "naver":
+                return "https://openapi.naver.com/v1/nid/me";
+            case "google":
+                return "https://www.googleapis.com/oauth2/v3/userinfo";
+            default:
+                throw new IllegalArgumentException("Unsupported provider: " + provider);
+        }
     }
 }

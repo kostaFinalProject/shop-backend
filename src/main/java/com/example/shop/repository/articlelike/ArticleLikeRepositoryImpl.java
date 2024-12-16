@@ -6,9 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 
-import static com.example.shop.domain.instagram.QArticle.article;
 import static com.example.shop.domain.instagram.QArticleLike.articleLike;
-import static com.example.shop.domain.instagram.QMember.member;
 
 @RequiredArgsConstructor
 public class ArticleLikeRepositoryImpl implements ArticleLikeRepositoryCustom{

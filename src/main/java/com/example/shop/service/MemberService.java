@@ -2,6 +2,7 @@ package com.example.shop.service;
 
 import com.example.shop.config.CustomOAuth2UserService;
 import com.example.shop.domain.instagram.*;
+import com.example.shop.domain.shop.Item;
 import com.example.shop.dto.login.LoginDto;
 import com.example.shop.dto.login.OAuthLoginDto;
 import com.example.shop.dto.member.*;
@@ -78,7 +79,7 @@ public class MemberService {
         member.updateMemberProfile(memberProfileImg, dto.getIntroduction());
     }
 
-    /** 회원 정보 조회*/
+    /** 회원 정보 조회 */
     @Transactional(readOnly = true)
     public MemberResponseDto getMemberInfo(Long memberId) {
         Member findMember = validationService.validateMemberById(memberId);
@@ -120,11 +121,56 @@ public class MemberService {
 
                     return ArticleSummaryResponseDto.createDto(article.getId(), targetMemberId,
                             article.getMember().getNickname(), memberProfileImageUrl,article.getArticleImages().get(0).getImgUrl(),
-                            article.getContent(), article.getLikes(), article.getViewCounts(),likeId, hashTags);
+                            article.getContent(), article.getLikes(), article.getViewCounts(), likeId, hashTags);
                 })
                 .toList();
 
         return new PageImpl<>(dtos, pageable, articles.getTotalElements());
+    }
+
+    /** 회원의 태그 상품 조회 */
+    public Page<ArticleItemResponseDto> getArticleItems(Long targetMemberId, Long fromMemberId, Pageable pageable) {
+        Page<Item> items = memberRepository.findTaggedItemsByMemberId(targetMemberId, fromMemberId, pageable);
+
+        List<ArticleItemResponseDto> dtos = items.stream()
+                .map(item ->
+                        ArticleItemResponseDto.createDto(item.getId(), item.getName(), item.getRepItemImage()))
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, items.getTotalElements());
+    }
+
+    /** 회원의 프로필 이미지 조회 */
+    @Transactional(readOnly = true)
+    public MemberProfileResponseDto getMemberProfile(Long targetMemberId, Long fromMemberId) {
+        Member targetMember = validationService.validateMemberById(targetMemberId);
+        String memberProfileImageUrl = null;
+        String introduction = null;
+        Long followerId = null;
+        String follow = "Not Follow";
+
+        if (targetMemberId.equals(fromMemberId)) {
+            follow = "Me";
+        }
+
+        if (targetMember.getMemberProfileImg() != null) {
+            memberProfileImageUrl = targetMember.getMemberProfileImg().getImgUrl();
+        }
+
+        if (targetMember.getIntroduction() != null) {
+            introduction = targetMember.getIntroduction();
+        }
+
+        Follower follower = validationService.findFollowerByFolloweeIdAndFollowerId(fromMemberId, targetMemberId);
+
+        if (follower != null) {
+            followerId = follower.getId();
+            follow = "Followed";
+        }
+
+        return MemberProfileResponseDto.createDto(targetMemberId, targetMember.getNickname(), introduction,
+                memberProfileImageUrl, targetMember.getAccountStatus().name(),
+                targetMember.getArticles(), targetMember.getFollowees(), targetMember.getFollowers(), followerId, follow);
     }
 
     /** 회원의 저장된 게시물 조회 */
@@ -233,12 +279,13 @@ public class MemberService {
 
     @Transactional
     public String oauthLogin(OAuthLoginDto loginDto) {
-        OAuth2User oAuth2User = customOAuth2UserService.loadUserFromKakao(loginDto.getAccessToken());
 
-        Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
-        String email = kakaoAccount.get("email").toString();
-        String provider = "kakao";
+        String provider = loginDto.getProvider();
         Provider providerEnum = Provider.valueOf(provider.toUpperCase());
+
+        OAuth2User oAuth2User = customOAuth2UserService.loadUserFromProvider(loginDto.getAccessToken(), provider);
+
+        String email = extractEmail(oAuth2User, provider);
 
         Member member = memberRepository.findByEmailAndProvider(email, providerEnum)
                 .orElseGet(() -> customOAuth2UserService.createSocialMember(email, providerEnum));
@@ -247,6 +294,21 @@ public class MemberService {
         String refreshToken = tokenService.generateRefreshToken(member.getUserId());
 
         return accessToken + ":" + refreshToken;
+    }
+
+    private String extractEmail(OAuth2User oAuth2User, String provider) {
+        return switch (provider) {
+            case "kakao" -> {
+                Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
+                yield kakaoAccount.get("email").toString();
+            }
+            case "naver" -> {
+                Map<String, Object> naverResponse = (Map<String, Object>) oAuth2User.getAttributes().get("response");
+                yield naverResponse.get("email").toString();
+            }
+            case "google" -> oAuth2User.getAttributes().get("email").toString();
+            default -> throw new IllegalArgumentException("Unsupported provider: " + provider);
+        };
     }
 
     /** 로그아웃 */

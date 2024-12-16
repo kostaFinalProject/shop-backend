@@ -62,4 +62,16 @@ public class FollowerRepositoryImpl implements FollowerRepositoryCustom{
                         .and(follower1.follower.id.eq(followeeId)))
                 .fetchOne() != null;
     }
+
+    @Override
+    public Follower findByFolloweeIdAndFollowerId(Long followeeId, Long followerId) {
+        if (followeeId == null) {
+            return null;
+        }
+
+        return queryFactory.selectFrom(follower1)
+                .where(follower1.followee.id.eq(followeeId)
+                        .and(follower1.follower.id.eq(followerId)))
+                .fetchFirst();
+    }
 }

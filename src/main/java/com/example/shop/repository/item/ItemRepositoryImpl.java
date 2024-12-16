@@ -40,7 +40,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .from(item)
                 .where(item.itemCategory.name.eq(category)
                         .and(item.name.eq(name)))
-                .fetchOne() != null;
+                .fetchFirst() != null;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .where(item.itemCategory.name.eq(category)
                         .and(item.name.eq(name)
                                 .and(item.id.ne(id))))
-                .fetchOne() != null;
+                .fetchFirst() != null;
     }
 
     @Override

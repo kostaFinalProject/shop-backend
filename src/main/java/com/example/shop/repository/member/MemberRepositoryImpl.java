@@ -1,6 +1,7 @@
 package com.example.shop.repository.member;
 
 import com.example.shop.domain.instagram.*;
+import com.example.shop.domain.shop.Item;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,9 +16,11 @@ import java.util.stream.Stream;
 
 import static com.example.shop.domain.instagram.QArticle.article;
 import static com.example.shop.domain.instagram.QArticleCollection.articleCollection;
+import static com.example.shop.domain.instagram.QArticleItem.articleItem;
 import static com.example.shop.domain.instagram.QBlock.block;
 import static com.example.shop.domain.instagram.QFollower.follower1;
 import static com.example.shop.domain.instagram.QMember.member;
+import static com.example.shop.domain.shop.QItem.item;
 
 @RequiredArgsConstructor
 public class MemberRepositoryImpl implements MemberRepositoryCustom {
@@ -85,6 +88,74 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return PageableExecutionUtils.getPage(articles, pageable, countQuery::fetchOne);
     }
 
+    @Override
+    public Page<Item> findTaggedItemsByMemberId(Long targetMemberId, Long fromMemberId, Pageable pageable) {
+        List<Item> items;
+        JPAQuery<Long> countQuery;
+
+        if (fromMemberId == null) {
+            items = queryFactory.selectDistinct(articleItem.item)
+                    .from(article)
+                    .join(article.articleItems, articleItem)
+                    .join(article.member, member)
+                    .where(
+                            article.member.id.eq(targetMemberId)
+                                    .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(article.member.accountStatus.eq(AccountStatus.PUBLIC))
+                    )
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+
+            countQuery = queryFactory.selectDistinct(articleItem.item.id.count())
+                    .from(article)
+                    .join(article.articleItems, articleItem)
+                    .join(article.member, member)
+                    .where(
+                            article.member.id.eq(targetMemberId)
+                                    .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(article.member.accountStatus.eq(AccountStatus.PUBLIC))
+                    );
+        } else {
+            List<Long> excludeMemberIds = getExcludedMemberIds(fromMemberId);
+            List<Long> followerList = getFollowerList(fromMemberId);
+
+            items = queryFactory.selectDistinct(articleItem.item)
+                    .from(article)
+                    .join(article.articleItems, articleItem)
+                    .join(article.member, member)
+                    .where(
+                            article.member.id.eq(targetMemberId)
+                                    .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(article.member.id.notIn(excludeMemberIds))
+                                    .and(
+                                            article.member.accountStatus.eq(AccountStatus.PUBLIC)
+                                                    .or(article.member.id.in(followerList))
+                                                    .or(article.member.id.eq(fromMemberId))
+                                    )
+                    )
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+
+            countQuery = queryFactory.selectDistinct(articleItem.item.id.count())
+                    .from(article)
+                    .join(article.articleItems, articleItem)
+                    .join(article.member, member)
+                    .where(
+                            article.member.id.eq(targetMemberId)
+                                    .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(article.member.id.notIn(excludeMemberIds))
+                                    .and(
+                                            article.member.accountStatus.eq(AccountStatus.PUBLIC)
+                                                    .or(article.member.id.in(followerList))
+                                                    .or(article.member.id.eq(fromMemberId))
+                                    )
+                    );
+        }
+
+        return PageableExecutionUtils.getPage(items, pageable, countQuery::fetchOne);
+    }
 
     @Override
     public boolean duplicateMember(String userId, String nickname, String email) {
@@ -289,7 +360,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                     .where(
                             member.nickname.containsIgnoreCase(nickName)
                                     .and(member.id.notIn(excludeMembersId))
-                                    .and(member.id.ne(fromMemberId))
                     )
                     .orderBy(
                             new CaseBuilder()
@@ -300,6 +370,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                                     .asc(),
                             member.createAt.desc()
                     )
+                    .orderBy(member.createAt.desc())
                     .offset(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .fetch();

@@ -6,4 +6,5 @@ import lombok.Setter;
 @Getter @Setter
 public class OAuthLoginDto {
     private String accessToken;
+    private String provider;
 }
