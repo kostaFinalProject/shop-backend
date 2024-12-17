@@ -38,22 +38,46 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
     }
 
     @Override
-    public Page<Comment> findCommentsByArticleId(Long articleId, Pageable pageable) {
+    public Page<Comment> findCommentsByArticleId(Long memberId, Long articleId, Pageable pageable) {
 
-        List<Comment> comments = queryFactory.selectFrom(comment)
-                .join(comment.article, article).fetchJoin()
-                .where(comment.id.eq(articleId)
-                        .and(comment.parentComment.isNull())
-                        .and(comment.commentStatus.ne(CommentStatus.DELETED)))
-                .orderBy(comment.likes.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+        List<Comment> comments;
+        JPAQuery<Long> countQuery;
 
-        JPAQuery<Long> countQuery = queryFactory.select(comment.count()).from(comment)
-                .where(comment.article.id.eq(articleId)
-                        .and(comment.parentComment.isNull())
-                        .and(comment.commentStatus.ne(CommentStatus.DELETED)));
+        if (memberId == null) {
+            comments = queryFactory.selectFrom(comment)
+                    .join(comment.article, article).fetchJoin()
+                    .where(comment.article.id.eq(articleId)
+                            .and(comment.parentComment.isNull())
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED)))
+                    .orderBy(comment.likes.desc())
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+
+            countQuery = queryFactory.select(comment.count()).from(comment)
+                    .where(comment.article.id.eq(articleId)
+                            .and(comment.parentComment.isNull())
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED)));
+        } else {
+            List<Long> excludedMemberIds = getExcludedMemberIds(memberId);
+
+            comments = queryFactory.selectFrom(comment)
+                    .join(comment.article, article).fetchJoin()
+                    .where(comment.article.id.eq(articleId)
+                            .and(comment.parentComment.isNull())
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED))
+                            .and(comment.member.id.notIn(excludedMemberIds)))
+                    .orderBy(comment.likes.desc())
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+
+            countQuery = queryFactory.select(comment.count()).from(comment)
+                    .where(comment.article.id.eq(articleId)
+                            .and(comment.parentComment.isNull())
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED))
+                            .and(comment.member.id.notIn(excludedMemberIds)));
+        }
 
         return PageableExecutionUtils.getPage(comments, pageable, countQuery::fetchOne);
     }

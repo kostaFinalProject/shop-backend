@@ -424,4 +424,20 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .where(follower1.followee.id.eq(memberId))
                 .fetch();
     }
+
+    @Override
+    public Page<Member> findRequestAdminMember(Pageable pageable) {
+
+        List<Member> members = queryFactory.selectFrom(member)
+                .where(member.grade.eq(Grade.NO_AUTHORIZATION_ADMIN))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory.select(member.count())
+                .from(member)
+                .where(member.grade.eq(Grade.NO_AUTHORIZATION_ADMIN));
+
+        return PageableExecutionUtils.getPage(members, pageable, countQuery::fetchOne);
+    }
 }

@@ -324,6 +324,17 @@ public class MemberService {
         return tokenService.refreshAccessToken(refreshToken);
     }
 
+    @Transactional(readOnly = true)
+    public Page<AdminRequestMemberDto> getAdminRequestMember(Pageable pageable) {
+        Page<Member> requestAdminMember = memberRepository.findRequestAdminMember(pageable);
+
+        List<AdminRequestMemberDto> dtos = requestAdminMember.stream()
+                .map(member -> AdminRequestMemberDto.createDto(member.getId(), member.getUserId(), member.getGrade().name()))
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, requestAdminMember.getTotalElements());
+    }
+
     /** 관리자 권한 승인 */
     @Transactional
     public void promotionAdmin(Long memberId) {

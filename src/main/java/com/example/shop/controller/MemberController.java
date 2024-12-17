@@ -40,6 +40,15 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body("회원가입에 성공했습니다.");
     }
 
+    /** 관리자 권한 신청자 조회 */
+    @GetMapping("/admin-request")
+    public ResponseEntity<?> getAdminRequest(@RequestParam(value = "page", defaultValue = "0") int page,
+                                             @RequestParam(value = "size", defaultValue = "10") int size) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getAdminRequestMember(pageable));
+    }
+
     /** 회원 정보 조회 */
     @GetMapping
     public ResponseEntity<?> getMember() {

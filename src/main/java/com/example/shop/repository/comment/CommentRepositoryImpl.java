@@ -12,8 +12,10 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.example.shop.domain.instagram.QArticle.article;
+import static com.example.shop.domain.instagram.QBlock.block;
 import static com.example.shop.domain.instagram.QComment.comment;
 import static com.example.shop.domain.instagram.QMember.member;
 
@@ -23,24 +25,49 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Comment> findReplyCommentsByCommentId(Long commentId, Pageable pageable) {
+    public Page<Comment> findReplyCommentsByCommentId(Long memberId, Long commentId, Pageable pageable) {
 
-        List<Comment> replyComments = queryFactory
-                .selectFrom(comment)
-                .where(comment.parentComment.id.eq(commentId)
-                        .and(comment.commentStatus.ne(CommentStatus.DELETED)))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
+        List<Comment> replyComments;
+        JPAQuery<Long> countQuery;
 
-        JPAQuery<Long> countQuery = queryFactory
-                .select(comment.count())
-                .from(comment)
-                .where(comment.parentComment.id.eq(commentId)
-                        .and(comment.commentStatus.ne(CommentStatus.DELETED)));
+        if (memberId == null) {
+            replyComments = queryFactory
+                    .selectFrom(comment)
+                    .where(comment.parentComment.id.eq(commentId)
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED)))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+
+            countQuery = queryFactory
+                    .select(comment.count())
+                    .from(comment)
+                    .where(comment.parentComment.id.eq(commentId)
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED)));
+
+        } else {
+            List<Long> excludedMemberIds = getExcludedMemberIds(memberId);
+
+            replyComments = queryFactory
+                    .selectFrom(comment)
+                    .where(comment.parentComment.id.eq(commentId)
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED))
+                            .and(comment.member.id.notIn(excludedMemberIds)))
+                    .offset(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .fetch();
+
+            countQuery = queryFactory
+                    .select(comment.count())
+                    .from(comment)
+                    .where(comment.parentComment.id.eq(commentId)
+                            .and(comment.commentStatus.ne(CommentStatus.DELETED))
+                            .and(comment.member.id.notIn(excludedMemberIds)));
+        }
 
         return PageableExecutionUtils.getPage(replyComments, pageable, countQuery::fetchOne);
     }
+
 
     @Override
     public Optional<Comment> findParentCommentWithArticleByCommentId(Long commentId) {
@@ -65,5 +92,24 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetchOne();
 
         return Optional.ofNullable(result);
+    }
+
+    /** 차단 기능에 따라 필터링 (내가 차단한 사람, 나를 차단한 사람을 검색 결과에서 제외 시킴) */
+    private List<Long> getExcludedMemberIds(Long memberId) {
+        List<Long> blockedMemberIds = queryFactory
+                .select(block.toMember.id)
+                .from(block)
+                .where(block.fromMember.id.eq(memberId))
+                .fetch();
+
+        List<Long> blockingMemberIds = queryFactory
+                .select(block.fromMember.id)
+                .from(block)
+                .where(block.toMember.id.eq(memberId))
+                .fetch();
+
+        return Stream.concat(blockedMemberIds.stream(), blockingMemberIds.stream())
+                .distinct()
+                .toList();
     }
 }

@@ -18,4 +18,5 @@ public interface MemberRepositoryCustom {
     boolean duplicateMember(String userId, String nickname, String email);
     Optional<Member> findByEmailAndProvider(String email, Provider provider);
     Page<Item> findTaggedItemsByMemberId(Long targetMemberId, Long fromMemberId, Pageable pageable);
+    Page<Member> findRequestAdminMember(Pageable pageable);
 }

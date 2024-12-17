@@ -80,6 +80,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/articles")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/articles/**")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.GET, "/error").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/discounts/**")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN")

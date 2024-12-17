@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface CommentRepositoryCustom {
-    Page<Comment> findReplyCommentsByCommentId(Long commentId, Pageable pageable);
+    Page<Comment> findReplyCommentsByCommentId(Long memberId, Long commentId, Pageable pageable);
     Optional<Comment> findParentCommentWithArticleByCommentId(Long commentId);
     Optional<Comment> validateCommentAndMemberById(Long commentId, Long memberId);
 }

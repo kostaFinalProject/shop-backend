@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -68,14 +69,28 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public Page<ReplyCommentResponseDto> getReplies(Long memberId, Long commentId, Pageable pageable) {
-        Page<Comment> replies = commentRepository.findReplyCommentsByCommentId(commentId, pageable);
+        Page<Comment> replies = commentRepository.findReplyCommentsByCommentId(memberId, commentId, pageable);
 
         List<ReplyCommentResponseDto> dtos = replies.stream()
                 .map(reply -> {
                     Long likeId = validationService.findCommentLikeIdByCommentAndMember(reply.getId(), memberId);
+                    String isMe = "Not Me";
+                    if (reply.getMember().getId().equals(memberId)) {
+                        isMe = "Me";
+                    }
 
-                    return ReplyCommentResponseDto.createDto(reply.getId(), reply.getMember().getNickname(),
-                            reply.getContent(), reply.getCommentImg().getImgUrl(), reply.getLikes(), likeId);
+                    String memberProfileImageUrl = null;
+                    if (reply.getMember().getMemberProfileImg() != null) {
+                        memberProfileImageUrl = reply.getMember().getMemberProfileImg().getImgUrl();
+                    }
+                    LocalDateTime time = reply.getCreateAt();
+                    if (reply.getUpdateAt() != null) {
+                        time = reply.getUpdateAt();
+                    }
+
+                    return ReplyCommentResponseDto.createDto(reply.getId(), memberProfileImageUrl,
+                            reply.getMember().getNickname(), reply.getContent(),
+                            reply.getCommentImg().getImgUrl(), reply.getLikes(), likeId, isMe, time);
                 })
                 .toList();
 

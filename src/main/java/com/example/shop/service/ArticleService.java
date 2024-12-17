@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -171,7 +172,7 @@ public class ArticleService {
                             .toList();
 
                     return ArticleSummaryResponseDto.createDto(article.getId(), article.getMember().getId(),
-                            article.getMember().getNickname(), memberProfileImageUrl,article.getArticleImages().get(0).getImgUrl(),
+                            article.getMember().getNickname(), memberProfileImageUrl, article.getArticleImages().get(0).getImgUrl(),
                             article.getContent(), article.getLikes(), article.getViewCounts(),likeId, hashTags);
                 })
                 .toList();
@@ -182,13 +183,34 @@ public class ArticleService {
     /** 게시글 댓글 조회 */
     @Transactional(readOnly = true)
     public Page<CommentResponseDto> getComments(Long memberId, Long articleId, Pageable pageable) {
-        Page<Comment> comments = articleRepository.findCommentsByArticleId(articleId, pageable);
+        Page<Comment> comments = articleRepository.findCommentsByArticleId(memberId, articleId, pageable);
 
         List<CommentResponseDto> dtos = comments.stream()
                 .map(comment -> {
                     Long likeId = validationService.findCommentLikeIdByCommentAndMember(comment.getId(), memberId);
-                    return CommentResponseDto.createDto(comment.getId(), comment.getMember().getNickname(), comment.getContent(),
-                            comment.getCommentImg().getImgUrl(), comment.getLikes(), comment.isReplyComments(), likeId);
+                    String isMe = "Not Me";
+                    if (comment.getMember().getId().equals(memberId)) {
+                        isMe = "Me";
+                    }
+
+                    String memberProfileImageUrl = null;
+                    if (comment.getMember().getMemberProfileImg() != null) {
+                        memberProfileImageUrl = comment.getMember().getMemberProfileImg().getImgUrl();
+                    }
+
+                    String commentImageUrl = null;
+                    if (comment.getCommentImg() != null) {
+                        commentImageUrl = comment.getCommentImg().getImgUrl();
+                    }
+
+                    LocalDateTime time = comment.getCreateAt();
+                    if (comment.getUpdateAt() != null) {
+                        time = comment.getUpdateAt();
+                    }
+
+                    return CommentResponseDto.createDto(comment.getId(), memberProfileImageUrl,
+                            comment.getMember().getNickname(), comment.getContent(), commentImageUrl,
+                            comment.getLikes(), comment.isReplyComments(), likeId, isMe, time);
                 })
                 .toList();
 
