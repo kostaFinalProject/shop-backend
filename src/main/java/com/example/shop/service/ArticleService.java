@@ -69,10 +69,11 @@ public class ArticleService {
 
         CommentImg commentImg = null;
         if (file != null && !file.isEmpty()) {
+            commentImg = imageService.saveCommentImg(file);
+        } else {
             if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
                 throw new IllegalArgumentException("댓글에는 글 또는 이미지 중 하나가 반드시 포함되어야 합니다.");
             }
-            commentImg = imageService.saveCommentImg(file);
         }
 
         Comment comment = Comment.createComment(article, member, dto.getContent(), null, commentImg);
