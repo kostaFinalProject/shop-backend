@@ -29,12 +29,12 @@ public class CommentController {
     private final ValidationService validationService;
 
     /** 대댓글 작성 */
-    @PostMapping("/{memberId}/{commentId}")
-    public ResponseEntity<?> saveReply(@PathVariable("memberId") Long memberId,
-                                         @PathVariable("commentId") Long commentId,
-                                         @RequestPart("comment")CommentRequestDto dto,
-                                         @RequestPart("file") MultipartFile file) {
+    @PostMapping("/{commentId}")
+    public ResponseEntity<?> saveReply(@PathVariable("commentId") Long commentId,
+                                       @RequestPart("comment")CommentRequestDto dto,
+                                       @RequestPart("file") MultipartFile file) {
 
+        Long memberId = SecurityAspect.getCurrentMemberId();
         commentService.saveReply(memberId, commentId, dto, file);
         return ResponseEntity.status(HttpStatus.OK).body("대댓글이 생성되었습니다.");
     }
