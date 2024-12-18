@@ -90,9 +90,14 @@ public class CommentService {
                         time = reply.getUpdateAt();
                     }
 
+                    String commentImage = null;
+                    if (reply.getCommentImg() != null) {
+                        commentImage = reply.getCommentImg().getImgUrl();
+                    }
+
                     return ReplyCommentResponseDto.createDto(reply.getId(), memberProfileImageUrl,
                             reply.getMember().getNickname(), reply.getContent(),
-                            reply.getCommentImg().getImgUrl(), reply.getLikes(), likeId, isMe, time);
+                            commentImage, reply.getLikes(), likeId, isMe, time);
                 })
                 .toList();
 
