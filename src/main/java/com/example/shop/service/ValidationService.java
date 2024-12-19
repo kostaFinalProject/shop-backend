@@ -19,6 +19,8 @@ import com.example.shop.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * 각종 엔티티 검증 서비스
  */
@@ -83,6 +85,11 @@ public class ValidationService {
     public Discount validateDiscountById(Long discountId) {
         return discountRepository.findById(discountId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 할인이 없습니다."));
+    }
+
+    public Discount findDiscountByItemId(Long itemId) {
+        return discountRepository.findDiscountByItemId(itemId)
+                .orElse(null);
     }
 
     public boolean existItemNameInItemCategory(String category, String itemName) {

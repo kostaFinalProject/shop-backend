@@ -77,7 +77,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         Comment parent = queryFactory.selectFrom(comment)
                 .join(comment.parentComment, parentComment).fetchJoin()
                 .join(parentComment.article, article).fetchJoin()
-                .where(parentComment.id.eq(commentId))
+                .where(comment.id.eq(commentId))
                 .fetchOne();
 
         return Optional.ofNullable(parent);

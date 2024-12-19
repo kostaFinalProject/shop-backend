@@ -28,7 +28,7 @@ public class CommentService {
     @Transactional
     public void saveReply(Long memberId, Long commentId, CommentRequestDto dto, MultipartFile file) {
         Member member = validationService.validateMemberById(memberId);
-        Comment parentComment = commentRepository.findParentCommentWithArticleByCommentId(commentId)
+        Comment parentComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 댓글이 아닙니다."));
 
         CommentImg commentImg = null;

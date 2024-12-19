@@ -1,8 +1,10 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
+import com.example.shop.domain.shop.Discount;
 import com.example.shop.domain.shop.Item;
 import com.example.shop.dto.instagram.article.ArticleDetailResponseDto;
+import com.example.shop.dto.instagram.article.ArticleItemResponseDto;
 import com.example.shop.dto.instagram.article.ArticleRequestDto;
 import com.example.shop.dto.instagram.article.ArticleSummaryResponseDto;
 import com.example.shop.dto.instagram.comment.CommentRequestDto;
@@ -147,11 +149,29 @@ public class ArticleService {
                 .map(articleTag -> articleTag.getTag().getTag())
                 .toList();
 
+        List<ArticleItemResponseDto> articleItems = null;
+        if (article.getArticleItems() != null && !article.getArticleItems().isEmpty()) {
+            articleItems = article.getArticleItems().stream()
+                    .map(articleItem -> {
+                        int price = articleItem.getItem().getPrice();
+
+                        Discount discount = validationService.findDiscountByItemId(articleItem.getItem().getId());
+
+                        if (discount != null) {
+                            price = discount.getDiscountPrice();
+                        }
+
+                        return ArticleItemResponseDto.createDto(articleItem.getItem().getId(), articleItem.getItem().getName(),
+                                price, articleItem.getItem().getRepItemImage());
+                    })
+                    .toList();
+        }
+
         long articleCommentsCount = commentRepository.countByArticleId(articleId);
         Long likeId = validationService.findArticleLikeIdByArticleAndMember(articleId, memberId);
 
         return ArticleDetailResponseDto.createDto(articleId, article.getMember().getId(), article.getMember().getNickname(),
-                memberProfileImageUrl, articleImages, hashTags, article.getContent(), following, article.getLikes(), articleCommentsCount, likeId, article.getCreateAt());
+                memberProfileImageUrl, articleImages, hashTags, articleItems, article.getContent(), following, article.getLikes(), articleCommentsCount, likeId, article.getCreateAt());
     }
 
     /** 게시글 전체 조회 */

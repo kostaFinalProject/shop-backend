@@ -16,6 +16,7 @@ public class ArticleDetailResponseDto {
     private String memberProfileImageUrl;
     private List<String> images;
     private List<String> hashtags;
+    private List<ArticleItemResponseDto> articleItems;
     private String content;
     private String isFollowing;
     private long likeCount;
@@ -24,11 +25,12 @@ public class ArticleDetailResponseDto {
     private LocalDateTime createdAt;
 
     public static ArticleDetailResponseDto createDto(Long articleId, Long memberId, String memberName, String memberProfileImageUrl,
-                                                     List<String> images, List<String> hashtags, String content, String isFollowing,
-                                                     long likeCount, long commentCount, Long likeId, LocalDateTime createdAt) {
+                                                     List<String> images, List<String> hashtags, List<ArticleItemResponseDto> articleItems,
+                                                     String content, String isFollowing, long likeCount, long commentCount,
+                                                     Long likeId, LocalDateTime createdAt) {
 
         return ArticleDetailResponseDto.builder().articleId(articleId).memberId(memberId).memberName(memberName)
-                .memberProfileImageUrl(memberProfileImageUrl).images(images).hashtags(hashtags).content(content)
+                .memberProfileImageUrl(memberProfileImageUrl).images(images).hashtags(hashtags).articleItems(articleItems).content(content)
                 .isFollowing(isFollowing).likeCount(likeCount).commentCount(commentCount).likeId(likeId).createdAt(createdAt).build();
     }
 }
