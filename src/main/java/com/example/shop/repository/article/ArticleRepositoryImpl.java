@@ -83,7 +83,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
     }
 
     @Override
-    public Page<Article> searchArticles(Long memberId, String tag, String item, Pageable pageable) {
+    public Page<Article> searchArticles(Long memberId, String tag, Long itemId, Pageable pageable) {
         BooleanExpression baseCondition;
         BooleanExpression commonCondition = article.articleStatus.eq(ArticleStatus.ACTIVE);
 
@@ -101,7 +101,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
         }
 
         BooleanExpression tagCondition = hasTag(tag);
-        BooleanExpression itemCondition = hasItem(item);
+        BooleanExpression itemCondition = hasItem(itemId);
         BooleanExpression combinedConditions = combineConditions(baseCondition, tagCondition, itemCondition);
 
         List<Article> articles = queryFactory.selectFrom(article)
@@ -117,7 +117,6 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
 
         return PageableExecutionUtils.getPage(articles, pageable, countQuery::fetchOne);
     }
-
 
     @Override
     public Optional<Article> validateArticleAndMemberById(Long articleId, Long memberId) {
@@ -167,12 +166,12 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
         return article.articleTags.any().tag.tag.containsIgnoreCase(tag);
     }
 
-    private BooleanExpression hasItem(String item) {
-        if (item == null || item.isBlank()) {
+    private BooleanExpression hasItem(Long itemId) {
+        if (itemId == null) {
             return null;
         }
 
-        return article.articleItems.any().item.name.containsIgnoreCase(item);
+        return article.articleItems.any().item.id.eq(itemId);
     }
 
     private BooleanExpression combineConditions(BooleanExpression... conditions) {

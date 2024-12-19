@@ -56,9 +56,9 @@ public class ArticleController {
     @PublicApi
     @GetMapping
     public ResponseEntity<?> getArticles(@RequestParam(value = "tag", required = false) String tag,
-                                         @RequestParam(value = "item", required = false) String item,
-                                         @RequestParam(value = "page", defaultValue = "0") int page,
-                                         @RequestParam(value = "size", defaultValue = "12") int size) {
+                                         @RequestParam(value = "itemId", required = false) Long itemId,
+                                         @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                         @RequestParam(value = "size", defaultValue = "12", required = false) int size) {
 
         Long memberId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -72,7 +72,7 @@ public class ArticleController {
         System.out.println("memberId = " + memberId);
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, tag, item, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, tag, itemId, pageable));
     }
 
     /** 게시글 단건 조회 */

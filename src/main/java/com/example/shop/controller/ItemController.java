@@ -2,13 +2,17 @@ package com.example.shop.controller;
 
 import com.example.shop.aop.PublicApi;
 import com.example.shop.aop.SecurityAspect;
+import com.example.shop.config.CustomUserDetails;
 import com.example.shop.dto.item.ItemRequestDto;
 import com.example.shop.service.ItemService;
+import com.example.shop.service.ValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +24,7 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final ValidationService validationService;
 
     @PostMapping
     public ResponseEntity<?> saveItem(@RequestPart("item")ItemRequestDto dto,
@@ -43,7 +48,15 @@ public class ItemController {
     @PublicApi
     @GetMapping("/{itemId}")
     public ResponseEntity<?> getItem(@PathVariable("itemId") Long itemId) {
-        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem(itemId));
+        Long memberId = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            if (userDetails.getUsername() != null) {
+                String userId = userDetails.getUsername();
+                memberId = validationService.validateMemberByUserId(userId).getId();
+            }
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem(memberId, itemId));
     }
 
     @PutMapping("/{itemId}")

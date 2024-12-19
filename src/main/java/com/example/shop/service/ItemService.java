@@ -1,5 +1,6 @@
 package com.example.shop.service;
 
+import com.example.shop.domain.instagram.Member;
 import com.example.shop.domain.shop.*;
 import com.example.shop.dto.item.*;
 import com.example.shop.repository.discount.DiscountRepository;
@@ -127,7 +128,14 @@ public class ItemService {
 
     /** 상품 단건 조회 */
     @Transactional(readOnly = true)
-    public ItemDetailResponseDto getItem(Long itemId) {
+    public ItemDetailResponseDto getItem(Long memberId, Long itemId) {
+        Member member;
+        String memberGrade = null;
+        if (memberId != null) {
+            member = validationService.validateMemberById(memberId);
+            memberGrade = member.getGrade().name();
+        }
+
         Item item = validationService.findItemById(itemId);
 
         List<ItemSizeResponseDto> itemSizesDto = item.getItemSizes().stream()
@@ -151,6 +159,6 @@ public class ItemService {
 
         return ItemDetailResponseDto.createDto(itemId, item.getItemCategory().getName(), item.getManufacturer(),
                 item.getName(), item.getPrice(), item.getSeller(), itemSizesDto, itemImageUrls,
-                item.getItemDetailImg().getImgUrl(), discountPercent, discountPrice);
+                item.getItemDetailImg().getImgUrl(), discountPercent, discountPrice, memberGrade);
     }
 }

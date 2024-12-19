@@ -20,14 +20,15 @@ public class ItemDetailResponseDto {
     private String itemDetailImageUrl;
     private int discountPercent;
     private int discountPrice;
+    private String memberGrade;
 
     public static ItemDetailResponseDto createDto(Long itemId, String itemCategory, String manufacturer, String name,
                                                   int price, String seller, List<ItemSizeResponseDto> itemSizes, List<String> imageUrls,
-                                                  String itemDetailImageUrl, int discountPercent, int discountPrice) {
+                                                  String itemDetailImageUrl, int discountPercent, int discountPrice, String memberGrade) {
 
         return ItemDetailResponseDto.builder().itemId(itemId).itemCategory(itemCategory)
                 .manufacturer(manufacturer).name(name).price(price).seller(seller)
                 .itemSizes(itemSizes).imageUrls(imageUrls).itemDetailImageUrl(itemDetailImageUrl)
-                .discountPercent(discountPercent).discountPrice(discountPrice).build();
+                .discountPercent(discountPercent).discountPrice(discountPrice).memberGrade(memberGrade).build();
     }
 }
