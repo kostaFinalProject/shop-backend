@@ -41,9 +41,13 @@ public class Item extends BaseEntity {
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemImg> itemImages = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "item_detail_img_id")
+    private ItemDetailImg itemDetailImg;
+
     @Builder
     private Item(ItemCategory itemCategory, String manufacturer, String seller, String name, int price,
-                 List<ItemSize> itemSizes, List<ItemImg> itemImages) {
+                 List<ItemSize> itemSizes, List<ItemImg> itemImages, ItemDetailImg itemDetailImg) {
         this.itemCategory = itemCategory;
         this.manufacturer = manufacturer;
         this.seller = seller;
@@ -51,13 +55,14 @@ public class Item extends BaseEntity {
         this.price = price;
         this.itemSizes = itemSizes;
         this.itemImages = itemImages;
+        this.itemDetailImg = itemDetailImg;
         this.itemStatus = ItemStatus.ACTIVE;
     }
 
     public static Item createItem(ItemCategory itemCategory, String manufacturer, String name, String seller,
-                                  int price, List<ItemSize> itemSizes, List<ItemImg> itemImages) {
+                                  int price, List<ItemSize> itemSizes, List<ItemImg> itemImages, ItemDetailImg itemDetailImg) {
         Item item = Item.builder().itemCategory(itemCategory).manufacturer(manufacturer).name(name).seller(seller)
-                .price(price).itemSizes(itemSizes).itemImages(itemImages).build();
+                .price(price).itemSizes(itemSizes).itemImages(itemImages).itemDetailImg(itemDetailImg).build();
 
         for (ItemSize itemSize : itemSizes) {
             itemSize.setItem(item);
@@ -72,11 +77,14 @@ public class Item extends BaseEntity {
         return item;
     }
 
-    public void updateItem(ItemCategory itemCategory, String name, int price, String manufacturer) {
+    public void updateItem(ItemCategory itemCategory, String name, int price, String manufacturer,
+                           String seller, ItemDetailImg itemDetailImg) {
         this.itemCategory = itemCategory;
         this.manufacturer = manufacturer;
+        this.seller = seller;
         this.name = name;
         this.price = price;
+        this.itemDetailImg = itemDetailImg;
     }
 
     /** 상품 이미지 수정 */

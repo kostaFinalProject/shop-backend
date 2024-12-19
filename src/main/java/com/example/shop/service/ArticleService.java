@@ -167,7 +167,7 @@ public class ArticleService {
                     .toList();
         }
 
-        long articleCommentsCount = commentRepository.countByArticleId(articleId);
+        long articleCommentsCount = commentRepository.countByArticleIdAndCommentStatus(articleId, CommentStatus.ACTIVE);
         Long likeId = validationService.findArticleLikeIdByArticleAndMember(articleId, memberId);
 
         return ArticleDetailResponseDto.createDto(articleId, article.getMember().getId(), article.getMember().getNickname(),

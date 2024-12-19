@@ -1,10 +1,7 @@
 package com.example.shop.service.image;
 
 import com.example.shop.domain.instagram.*;
-import com.example.shop.domain.shop.Item;
-import com.example.shop.domain.shop.ItemCategory;
-import com.example.shop.domain.shop.ItemCategoryImg;
-import com.example.shop.domain.shop.ItemImg;
+import com.example.shop.domain.shop.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -96,6 +93,36 @@ public class ImageService {
     public void deleteItemImg(Item item) {
         for (ItemImg existingItemImg : item.getItemImages()) {
             imgStorageService.delete(existingItemImg.getImgUrl());
+        }
+    }
+
+    /** 상품 상세 이미지*/
+    public ItemDetailImg saveItemDetailImg(MultipartFile file) {
+        String imgUrl = imgStorageService.store(file);
+        String imgFileNameInDb = Paths.get(imgUrl).getFileName().toString();
+
+        return ItemDetailImg.createItemDetailImg(imgFileNameInDb, file.getOriginalFilename(), imgUrl);
+    }
+
+    public ItemDetailImg updateItemDetailImg(Item item, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return item.getItemDetailImg();
+        }
+
+        if (item.getItemDetailImg() != null && item.getItemDetailImg().getImgUrl().equals(file.getOriginalFilename())) {
+            return item.getItemDetailImg();
+        }
+
+        if (item.getItemDetailImg() != null) {
+            imgStorageService.delete(item.getItemDetailImg().getImgUrl());
+        }
+
+        return saveItemDetailImg(file);
+    }
+
+    public void deleteItemDetailImg(Item item) {
+        if (item.getItemDetailImg() != null) {
+            imgStorageService.delete(item.getItemDetailImg().getImgUrl());
         }
     }
 

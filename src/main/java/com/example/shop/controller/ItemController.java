@@ -23,8 +23,9 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<?> saveItem(@RequestPart("item")ItemRequestDto dto,
-                                      @RequestPart("files")List<MultipartFile> files) {
-        itemService.saveItem(dto, files);
+                                      @RequestPart("itemImages")List<MultipartFile> itemImages,
+                                      @RequestPart("itemDetailImage") MultipartFile itemDetailImage) {
+        itemService.saveItem(dto, itemImages, itemDetailImage);
         return ResponseEntity.status(HttpStatus.CREATED).body("상품이 성공적으로 생성되었습니다.");
     }
 
@@ -48,9 +49,10 @@ public class ItemController {
     @PutMapping("/{itemId}")
     public ResponseEntity<?> updateItem(@PathVariable("itemId") Long itemId,
                                         @RequestPart("item")ItemRequestDto dto,
-                                        @RequestPart("files")List<MultipartFile> files) {
+                                        @RequestPart("itemImages")List<MultipartFile> itemImages,
+                                        @RequestPart("itemDetailImage")MultipartFile itemDetailImage) {
         Long memberId = SecurityAspect.getCurrentMemberId();
-        itemService.updateItem(itemId, dto, files);
+        itemService.updateItem(itemId, dto, itemImages, itemDetailImage);
         return ResponseEntity.status(HttpStatus.OK).body("상품이 성공적으로 수정되었습니다.");
     }
 

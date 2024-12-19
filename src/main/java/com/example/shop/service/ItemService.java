@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +21,12 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final DiscountRepository discountRepository;
-    private final ImageService itemImgService;
+    private final ImageService imageService;
     private final ValidationService validationService;
 
     /** 상품 등록 */
     @Transactional
-    public void saveItem(ItemRequestDto dto, List<MultipartFile> itemImages) {
+    public void saveItem(ItemRequestDto dto, List<MultipartFile> itemImages, MultipartFile itemDetailImage) {
         ItemCategory itemCategory = validationService.validateItemCategoryByName(dto.getItemCategory());
 
         if (validationService.existItemNameInItemCategory(dto.getItemCategory(), dto.getName())) {
@@ -41,15 +40,18 @@ public class ItemService {
                 })
                 .toList();
 
-        List<ItemImg> itemImgs = itemImgService.saveItemImgs(itemImages);
+        List<ItemImg> itemImgs = imageService.saveItemImgs(itemImages);
 
-        Item item = Item.createItem(itemCategory, dto.getManufacturer(), dto.getName(), dto.getSeller(), dto.getPrice(), itemSizes, itemImgs);
+        ItemDetailImg itemDetailImg = imageService.saveItemDetailImg(itemDetailImage);
+
+        Item item = Item.createItem(itemCategory, dto.getManufacturer(), dto.getName(),
+                dto.getSeller(), dto.getPrice(), itemSizes, itemImgs, itemDetailImg);
         itemRepository.save(item);
     }
 
     /** 상품 수정 */
     @Transactional
-    public void updateItem(Long itemId, ItemRequestDto dto, List<MultipartFile> itemImages) {
+    public void updateItem(Long itemId, ItemRequestDto dto, List<MultipartFile> itemImages, MultipartFile itemDetailImage) {
         Item item = validationService.validateItemById(itemId);
         ItemCategory itemCategory = validationService.validateItemCategoryByName(dto.getItemCategory());
 
@@ -62,9 +64,10 @@ public class ItemService {
             itemSize.updateStockQuantity(sizeDto.getStockQuantity());
         }
 
-        List<ItemImg> newItemImages = itemImgService.updateItemImgs(item, itemImages);
+        List<ItemImg> newItemImages = imageService.updateItemImgs(item, itemImages);
+        ItemDetailImg newItemDetailImg = imageService.saveItemDetailImg(itemDetailImage);
 
-        item.updateItem(itemCategory, dto.getName(), dto.getPrice(), dto.getManufacturer());
+        item.updateItem(itemCategory, dto.getName(), dto.getPrice(), dto.getManufacturer(), dto.getSeller(), newItemDetailImg);
         item.updateItemImg(newItemImages);
     }
 
@@ -91,7 +94,7 @@ public class ItemService {
             itemSize.removeStock(itemSize.getStockQuantity());
         }
 
-        itemImgService.deleteItemImg(item);
+        imageService.deleteItemImg(item);
         item.deleteItem();
     }
 
@@ -147,6 +150,7 @@ public class ItemService {
         }
 
         return ItemDetailResponseDto.createDto(itemId, item.getItemCategory().getName(), item.getManufacturer(),
-                item.getName(), item.getPrice(), item.getSeller(), itemSizesDto, itemImageUrls, discountPercent, discountPrice);
+                item.getName(), item.getPrice(), item.getSeller(), itemSizesDto, itemImageUrls,
+                item.getItemDetailImg().getImgUrl(), discountPercent, discountPrice);
     }
 }
