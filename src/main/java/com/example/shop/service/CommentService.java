@@ -46,7 +46,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(Long memberId, Long commentId, CommentUpdateRequestDto dto, MultipartFile file) {
+    public String updateComment(Long memberId, Long commentId, CommentUpdateRequestDto dto, MultipartFile file) {
         Comment comment = validationService.validateCommentAndMemberById(commentId, memberId);
 
         if (!comment.getMember().getId().equals(memberId)) {
@@ -67,6 +67,12 @@ public class CommentService {
         }
 
         comment.updateComment(dto.getContent(), commentImg);
+
+        if (comment.getCommentImg() == null) {
+            return null;
+        }
+
+        return comment.getCommentImg().getImgUrl();
     }
 
     @Transactional(readOnly = true)

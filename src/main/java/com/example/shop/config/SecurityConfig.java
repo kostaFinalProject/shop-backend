@@ -82,6 +82,8 @@ public class SecurityConfig {
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/comments/**")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/**")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.POST, "/api/v1/articles")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.POST, "/api/v1/articles/**")

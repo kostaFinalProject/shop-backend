@@ -65,8 +65,8 @@ public class CommentController {
                                            @RequestPart("comment") CommentUpdateRequestDto dto,
                                            @RequestPart("file") MultipartFile file) {
         Long memberId = SecurityAspect.getCurrentMemberId();
-        commentService.updateComment(memberId, commentId, dto, file);
-        return ResponseEntity.status(HttpStatus.OK).body("댓글이 수정되었습니다.");
+        String commentImgUrl = commentService.updateComment(memberId, commentId, dto, file);
+        return ResponseEntity.status(HttpStatus.OK).body(commentImgUrl);
     }
 
     /** 댓글 및 대댓글 활성화 (관리자 기능) */
