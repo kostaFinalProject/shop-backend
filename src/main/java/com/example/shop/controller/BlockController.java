@@ -1,5 +1,6 @@
 package com.example.shop.controller;
 
+import com.example.shop.aop.SecurityAspect;
 import com.example.shop.service.BlockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,9 @@ public class BlockController {
 
     private final BlockService blockService;
 
-    @PostMapping("/{memberId}/{toMemberId}")
-    public ResponseEntity<?> saveBlock(@PathVariable("memberId") Long memberId,
-                                       @PathVariable("toMemberId") Long toMemberId) {
-
+    @PostMapping("/{toMemberId}")
+    public ResponseEntity<?> saveBlock(@PathVariable("toMemberId") Long toMemberId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         blockService.saveBlock(memberId, toMemberId);
         return ResponseEntity.status(HttpStatus.OK).body("차단 목록에 추가했습니다.");
     }

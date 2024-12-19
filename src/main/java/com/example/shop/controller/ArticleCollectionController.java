@@ -1,5 +1,6 @@
 package com.example.shop.controller;
 
+import com.example.shop.aop.SecurityAspect;
 import com.example.shop.service.ArticleCollectionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,9 @@ public class ArticleCollectionController {
     private final ArticleCollectionService articleCollectionService;
 
     /** 게시물 저장 */
-    @PostMapping("/{memberId}/{articleId}")
-    public ResponseEntity<?> saveArticleCollection(@PathVariable("memberId") Long memberId,
-                                                   @PathVariable("articleId") Long articleId) {
+    @PostMapping("/{articleId}")
+    public ResponseEntity<?> saveArticleCollection(@PathVariable("articleId") Long articleId) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
         articleCollectionService.saveArticleCollection(memberId, articleId);
         return ResponseEntity.status(HttpStatus.OK).body("게시물 컬렉션에 추가했습니다.");
     }
