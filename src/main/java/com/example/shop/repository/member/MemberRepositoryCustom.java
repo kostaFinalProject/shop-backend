@@ -14,7 +14,7 @@ public interface MemberRepositoryCustom {
     Page<Follower> findFollowingByMemberId(Long targetMemberId, Long fromMemberId, Pageable pageable);
     Page<Follower> findFollowingRequestByMemberId(Long memberId, Pageable pageable);
     Page<Block> findBlockByMemberId(Long memberId, Pageable pageable);
-    Page<Member> findMembersByNickName(String nickName, Long fromMemberId, Pageable pageable);
+    Page<Member> searchMember(String nickName, Long fromMemberId, Pageable pageable);
     boolean duplicateMember(String userId, String nickname, String email);
     Optional<Member> findByEmailAndProvider(String email, Provider provider);
     Page<Item> findTaggedItemsByMemberId(Long targetMemberId, Long fromMemberId, Pageable pageable);

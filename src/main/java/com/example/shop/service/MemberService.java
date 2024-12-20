@@ -252,10 +252,16 @@ public class MemberService {
     /** 회원 조회 */
     @Transactional(readOnly = true)
     public Page<MemberListResponseDto> getMemberList(String nickname, Long memberId, Pageable pageable) {
-        Page<Member> members = memberRepository.findMembersByNickName(nickname, memberId, pageable);
+        Page<Member> members = memberRepository.searchMember(nickname, memberId, pageable);
 
         List<MemberListResponseDto> dtos = members.stream()
-                .map(member -> MemberListResponseDto.createDto(member.getId(), member.getNickname()))
+                .map(member -> {
+                    String memberProfileImageUrl = null;
+                    if (member.getMemberProfileImg() != null) {
+                        memberProfileImageUrl = member.getMemberProfileImg().getImgUrl();
+                    }
+                    return MemberListResponseDto.createDto(member.getId(), member.getNickname(), memberProfileImageUrl);
+                })
                 .toList();
 
         return new PageImpl<>(dtos, pageable, members.getTotalElements());

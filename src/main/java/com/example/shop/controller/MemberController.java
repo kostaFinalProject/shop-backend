@@ -130,7 +130,7 @@ public class MemberController {
     /** 차단자를 제외한 전체 회원 조회 */
     @PublicApi
     @GetMapping("/all")
-    public ResponseEntity<?> getMembers(@RequestParam(value = "nickname") String nickname,
+    public ResponseEntity<?> getMembers(@RequestParam(value = "nickname", required = false) String nickname,
                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                         @RequestParam(value = "size", defaultValue = "30") int size) {
 

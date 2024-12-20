@@ -2,6 +2,7 @@ package com.example.shop.repository.member;
 
 import com.example.shop.domain.instagram.*;
 import com.example.shop.domain.shop.Item;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -336,13 +337,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     @Override
-    public Page<Member> findMembersByNickName(String nickName, Long fromMemberId, Pageable pageable) {
+    public Page<Member> searchMember(String nickName, Long fromMemberId, Pageable pageable) {
         List<Member> members;
         JPAQuery<Long> countQuery;
 
+        BooleanExpression nicknameCondition = hasNickname(nickName);
+
         if (fromMemberId == null) {
             members = queryFactory.selectFrom(member)
-                    .where(member.nickname.containsIgnoreCase(nickName))
+                    .where(nicknameCondition)
                     .offset(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .orderBy(member.createAt.desc())
@@ -350,16 +353,17 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
             countQuery = queryFactory.select(member.count())
                     .from(member)
-                    .where(member.nickname.containsIgnoreCase(nickName));
+                    .where(nicknameCondition);
         } else {
+            // fromMemberId가 있는 경우 추가 로직 처리
             List<Long> excludeMembersId = getExcludedMemberIds(fromMemberId);
             List<Long> followList = getFollowerList(fromMemberId);
             List<Long> followerList = getFollowList(fromMemberId);
 
             members = queryFactory.selectFrom(member)
                     .where(
-                            member.nickname.containsIgnoreCase(nickName)
-                                    .and(member.id.notIn(excludeMembersId))
+                            nicknameCondition, // 닉네임 조건 추가
+                            member.id.notIn(excludeMembersId) // 제외 조건
                     )
                     .orderBy(
                             new CaseBuilder()
@@ -370,7 +374,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                                     .asc(),
                             member.createAt.desc()
                     )
-                    .orderBy(member.createAt.desc())
                     .offset(pageable.getOffset())
                     .limit(pageable.getPageSize())
                     .fetch();
@@ -378,8 +381,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
             countQuery = queryFactory.select(member.count())
                     .from(member)
                     .where(
-                            member.nickname.containsIgnoreCase(nickName)
-                                    .and(member.id.notIn(excludeMembersId))
+                            nicknameCondition,
+                            member.id.notIn(excludeMembersId)
                     );
         }
 
@@ -423,6 +426,14 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .from(follower1)
                 .where(follower1.followee.id.eq(memberId))
                 .fetch();
+    }
+
+    private BooleanExpression hasNickname(String nickName) {
+        if (nickName == null || nickName.isBlank()) {
+            return null;
+        }
+
+        return member.nickname.containsIgnoreCase(nickName);
     }
 
     @Override
