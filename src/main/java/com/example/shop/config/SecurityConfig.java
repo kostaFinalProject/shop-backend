@@ -65,6 +65,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/item-categories/*").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/item-categories")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/members/admin-request")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/api/v1/items").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/items/**").permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/items").authenticated()
