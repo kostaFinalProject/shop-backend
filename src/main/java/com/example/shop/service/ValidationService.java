@@ -1,14 +1,12 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.*;
-import com.example.shop.domain.shop.Discount;
-import com.example.shop.domain.shop.Item;
-import com.example.shop.domain.shop.ItemCategory;
-import com.example.shop.domain.shop.Size;
+import com.example.shop.domain.shop.*;
 import com.example.shop.repository.*;
 import com.example.shop.repository.article.ArticleRepository;
 import com.example.shop.repository.articlelike.ArticleLikeRepository;
 import com.example.shop.repository.block.BlockRepository;
+import com.example.shop.repository.cart.CartRepository;
 import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.repository.commentlike.CommentLikeRepository;
 import com.example.shop.repository.discount.DiscountRepository;
@@ -16,10 +14,9 @@ import com.example.shop.repository.follower.FollowerRepository;
 import com.example.shop.repository.item.ItemRepository;
 import com.example.shop.repository.itemcategory.ItemCategoryRepository;
 import com.example.shop.repository.member.MemberRepository;
+import com.example.shop.repository.wishlist.WishListItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * 각종 엔티티 검증 서비스
@@ -41,6 +38,8 @@ public class ValidationService {
     private final ArticleCollectionRepository articleCollectionRepository;
     private final BlockRepository blockRepository;
     private final DiscountRepository discountRepository;
+    private final CartRepository cartRepository;
+    private final WishListItemRepository wishListItemRepository;
 
     public Member validateMemberById(Long memberId) {
         return memberRepository.findById(memberId)
@@ -90,6 +89,16 @@ public class ValidationService {
     public Discount findDiscountByItemId(Long itemId) {
         return discountRepository.findDiscountByItemId(itemId)
                 .orElse(null);
+    }
+
+    public Cart validateCartById(Long cartId) {
+        return cartRepository.findById(cartId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 장바구니 상품이 없습니다."));
+    }
+
+    public WishListItem validateWishListItemById(Long wishListItemId) {
+        return wishListItemRepository.findById(wishListItemId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 관심 상품이 없습니다."));
     }
 
     public boolean existItemNameInItemCategory(String category, String itemName) {

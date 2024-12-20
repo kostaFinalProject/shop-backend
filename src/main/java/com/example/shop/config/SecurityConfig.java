@@ -111,7 +111,14 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/v1/blocks/**")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/blocks/**")
-                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER"))
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN", "USER")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/carts/").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/carts/**").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/carts").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/carts").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/wish-lists/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/wish-lists/**").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/wish-lists").authenticated())
                 .oauth2Login(oauth ->
                         oauth
                                 .loginPage("http://localhost:3000/login")
