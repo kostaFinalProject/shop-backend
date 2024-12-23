@@ -5,7 +5,6 @@ import lombok.Setter;
 
 @Getter @Setter
 public class OrderItemRequestDto {
-    private Long itemId;
-    private String size;
+    private Long itemSizeId;
     private int count;
 }

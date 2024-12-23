@@ -14,7 +14,7 @@ public class CartItemDto {
     private int price;
     private String repImgUrl;
     private int count;
-    private int currentPrice; // 현재 가격 (price * count)
+    private int currentPrice;
 
     @Builder
     private CartItemDto(Long cartId, Long itemSizeId, String name, int price,

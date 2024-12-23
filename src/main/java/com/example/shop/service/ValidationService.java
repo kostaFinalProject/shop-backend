@@ -14,6 +14,7 @@ import com.example.shop.repository.follower.FollowerRepository;
 import com.example.shop.repository.item.ItemRepository;
 import com.example.shop.repository.itemcategory.ItemCategoryRepository;
 import com.example.shop.repository.member.MemberRepository;
+import com.example.shop.repository.order.OrderRepository;
 import com.example.shop.repository.wishlist.WishListItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,8 @@ public class ValidationService {
     private final CommentRepository commentRepository;
     private final ItemCategoryRepository itemCategoryRepository;
     private final ItemRepository itemRepository;
+    private final ItemSizeRepository itemSizeRepository;
+    private final OrderRepository orderRepository;
     private final SizeRepository sizeRepository;
     private final TagRepository tagRepository;
     private final FollowerRepository followerRepository;
@@ -71,6 +74,12 @@ public class ValidationService {
                 .orElseThrow(() -> new IllegalArgumentException("등록된 카테고리가 없습니다."));
     }
 
+    public Order validateOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문 기록이 없습니다."));
+
+    }
+
     public Item validateItemById(Long itemId) {
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 상품이 없습니다."));
@@ -84,6 +93,11 @@ public class ValidationService {
     public Discount validateDiscountById(Long discountId) {
         return discountRepository.findById(discountId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 할인이 없습니다."));
+    }
+
+    public ItemSize validateItemSizeById(Long itemSizeId) {
+        return itemSizeRepository.findById(itemSizeId)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 상품이 없습니다."));
     }
 
     public Discount findDiscountByItemId(Long itemId) {

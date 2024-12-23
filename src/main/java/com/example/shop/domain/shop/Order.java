@@ -32,11 +32,15 @@ public class Order extends BaseEntity {
 
     private int orderPrice;
 
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
     @Builder
     private Order(Member member, List<OrderItem> orderItems, int orderPrice) {
         this.member = member;
         this.orderItems = orderItems;
         this.orderPrice = orderPrice;
+        this.orderStatus = OrderStatus.ORDERED;
     }
 
     public static Order createOrder(Member member, List<OrderItem> orderItems) {
@@ -64,6 +68,7 @@ public class Order extends BaseEntity {
 
     /** 주문 취소 */
     public void cancel() {
+        this.orderStatus = OrderStatus.CANCELED;
         for (OrderItem orderItem : orderItems) {
             orderItem.cancel();
         }

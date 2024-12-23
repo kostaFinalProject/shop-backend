@@ -97,7 +97,8 @@ public class MemberService {
 
         return MemberResponseDto.createDto(findMember.getId(), findMember.getName(), findMember.getNickname(),
                 findMember.getEmail(), phone, postCode,
-                roadAddress, detailAddress, findMember.getGrade().name());
+                roadAddress, detailAddress, findMember.getGrade().name(), findMember.getPointGrade().name(),
+                findMember.getPoints(), findMember.getPayment());
     }
 
     /** 회원의 게시물 조회 (프로필 비공개 시 팔로우 해야만 조회 가능) */

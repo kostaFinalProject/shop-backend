@@ -1,6 +1,7 @@
 package com.example.shop.domain.instagram;
 
 import com.example.shop.domain.baseentity.BaseEntity;
+import com.example.shop.domain.shop.PointGrade;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -50,6 +51,11 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
+    @Enumerated(EnumType.STRING)
+    private PointGrade pointGrade;
+    private int points;
+    private int payment;
+
     @Builder
     private Member(String userId, String password, String name, String nickname, String email, String phone,
                    Address address, MemberProfileImg memberProfileImg, String introduction, Grade grade, Provider provider) {
@@ -67,6 +73,9 @@ public class Member extends BaseEntity {
         this.followees = 0;
         this.followers = 0;
         this.accountStatus = AccountStatus.PRIVATE;
+        this.pointGrade = PointGrade.BRONZE;
+        this.points = 0;
+        this.payment = 0;
         this.provider = provider;
     }
 
