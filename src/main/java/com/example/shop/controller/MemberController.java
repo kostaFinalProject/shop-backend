@@ -76,7 +76,7 @@ public class MemberController {
     }
 
     /** 회원별 저장된 게시글 조회 */
-    @GetMapping("/articlecollections")
+    @GetMapping("/article-collections")
     public ResponseEntity<?> getMemberArticleCollections(@RequestParam(value = "page", defaultValue = "0") int page,
                                                          @RequestParam(value = "size", defaultValue = "15") int size) {
 
