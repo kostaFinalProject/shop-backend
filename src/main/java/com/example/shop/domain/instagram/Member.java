@@ -137,6 +137,42 @@ public class Member extends BaseEntity {
         this.introduction = introduction;
     }
 
+    public void payment(int price) {
+        this.payment += price;
+
+        if (payment >= 300000) {
+            this.pointGrade = PointGrade.GOLD;
+        } else if (payment >= 100000) {
+            this.pointGrade = PointGrade.SILVER;
+        }
+
+        this.points += (int)Math.round((double) price / 100.0);
+    }
+
+    public void cancelPayment(int price) {
+        if (this.payment < price) {
+            throw new IllegalStateException("결제 금액보다 큰 금액을 취소할 수 없습니다.");
+        }
+
+        this.payment -= price;
+
+        if (payment < 100000) {
+            this.pointGrade = PointGrade.BRONZE;
+        } else if (payment < 300000) {
+            this.pointGrade = PointGrade.SILVER;
+        } else {
+            this.pointGrade = PointGrade.GOLD;
+        }
+
+        int pointsToDeduct = (int) Math.round((double) price / 100.0);
+        if (this.points < pointsToDeduct) {
+            this.points = 0;
+        } else {
+            this.points -= pointsToDeduct;
+        }
+    }
+
+
     /** 프로필 공개 여부 설정 */
     public void updateMemberAccountStatus(AccountStatus accountStatus) {
         this.accountStatus = accountStatus;

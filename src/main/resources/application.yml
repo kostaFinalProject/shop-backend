@@ -125,3 +125,9 @@ jwt:
 
 app:
   redirect-uri: http://localhost:3000
+
+iam:
+  code: imp81860065
+  api:
+    key: 5003224417582270
+    secretkey: 7Li7UwAXL9cJ0CiYtcnMvzrp4BSQo1KFYLKkF7MarOSRGdkcPnfkCZX6iEKkpHigZGMZBR6gAprjF7qR

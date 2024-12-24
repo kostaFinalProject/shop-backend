@@ -51,6 +51,13 @@ public class OrderService {
 
         List<OrderResponseDto> dtos = orders.getContent().stream()
                 .map(order -> {
+
+                    Long paymentsId = null;
+                    if (order.getOrderStatus().equals(OrderStatus.PAID)) {
+                        Payments payments = validationService.findByOrderId(order.getId());
+                        paymentsId = payments.getId();
+                    }
+
                     List<OrderItemResponseDto> orderItems = order.getOrderItems().stream()
                             .map(orderItem -> OrderItemResponseDto.createDto(
                                     orderItem.getItemSize().getItem().getId(),
@@ -60,7 +67,8 @@ public class OrderService {
                                     orderItem.getItemSize().getItem().getRepItemImage()
                             )).collect(Collectors.toList());
 
-                    return OrderResponseDto.createDto(orderItems, order.getOrderPrice(), order.getOrderStatus().name());
+                    return OrderResponseDto.createDto(paymentsId, orderItems,
+                            order.getOrderPrice(), order.getOrderStatus().name());
                 })
                 .collect(Collectors.toList());
 

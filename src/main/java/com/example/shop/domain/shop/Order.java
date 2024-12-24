@@ -66,6 +66,11 @@ public class Order extends BaseEntity {
                 .sum();
     }
 
+    /** 결제 완료 */
+    public void payment() {
+        this.orderStatus = OrderStatus.PAID;
+    }
+
     /** 주문 취소 */
     public void cancel() {
         this.orderStatus = OrderStatus.CANCELED;

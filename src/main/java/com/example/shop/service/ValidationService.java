@@ -33,6 +33,7 @@ public class ValidationService {
     private final ItemRepository itemRepository;
     private final ItemSizeRepository itemSizeRepository;
     private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
     private final SizeRepository sizeRepository;
     private final TagRepository tagRepository;
     private final FollowerRepository followerRepository;
@@ -78,6 +79,16 @@ public class ValidationService {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문 기록이 없습니다."));
 
+    }
+
+    public Payments validatePaymentById(Long paymentId) {
+        return paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("결제 기록이 없습니다."));
+    }
+
+    public Payments findByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("결제 기록이 없습니다."));
     }
 
     public Item validateItemById(Long itemId) {
