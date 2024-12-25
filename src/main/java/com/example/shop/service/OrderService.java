@@ -24,19 +24,24 @@ public class OrderService {
     private final ValidationService validationService;
 
     @Transactional
-    public void saveOrder(Long memberId, OrderRequestDto dto) {
+    public Order saveOrder(Long memberId, OrderRequestDto dto) {
         Member member = validationService.validateMemberById(memberId);
 
         List<OrderItem> orderItems = dto.getOrderItems().stream()
                 .map(orderItemRequestDto -> {
                     ItemSize itemSize = validationService.validateItemSizeById(orderItemRequestDto.getItemSizeId());
-                    return OrderItem.createOrderItem(itemSize, itemSize.getItem().getPrice(),
-                            orderItemRequestDto.getCount());
+                    Discount discount = validationService.findDiscountByItemId(itemSize.getItem().getId());
+
+                    int price = itemSize.getItem().getPrice();
+                    if (discount != null) {
+                        price = discount.getDiscountPrice();
+                    }
+                    return OrderItem.createOrderItem(itemSize, price, orderItemRequestDto.getCount());
                 })
                 .toList();
 
         Order order = Order.createOrder(member, orderItems);
-        orderRepository.save(order);
+        return orderRepository.save(order);
     }
 
     @Transactional

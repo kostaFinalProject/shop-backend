@@ -1,6 +1,7 @@
 package com.example.shop.controller;
 
 import com.example.shop.aop.SecurityAspect;
+import com.example.shop.domain.shop.Order;
 import com.example.shop.dto.order.OrderRequestDto;
 import com.example.shop.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,8 +24,13 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> saveOrder(@RequestBody OrderRequestDto dto) {
         Long memberId = SecurityAspect.getCurrentMemberId();
-        orderService.saveOrder(memberId, dto);
-        return ResponseEntity.status(HttpStatus.OK).body("주문이 등록되었습니다.");
+        Order order = orderService.saveOrder(memberId, dto);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("orderId", order.getId());
+        response.put("amount", order.getOrderPrice());
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping

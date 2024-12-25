@@ -11,6 +11,7 @@ public class WishListItemResponseDto {
     private Long itemId;
     private String itemName;
     private int itemPrice;
+    private int mileage;
     private String itemRepImageUrl;
 
     public static WishListItemResponseDto createDto(Long wishListItemId, Long itemId, String itemName,
