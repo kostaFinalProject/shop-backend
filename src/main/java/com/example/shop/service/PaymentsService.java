@@ -4,7 +4,7 @@ import com.example.shop.domain.instagram.Member;
 import com.example.shop.domain.shop.Order;
 import com.example.shop.domain.shop.Payments;
 import com.example.shop.dto.payment.PaymentRequestDto;
-import com.example.shop.repository.PaymentRepository;
+import com.example.shop.repository.PaymentsRepository;
 import com.siot.IamportRestClient.response.Payment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class PaymentsService {
 
-    private final PaymentRepository paymentRepository;
+    private final PaymentsRepository paymentsRepository;
     private final ValidationService validationService;
     private final PortOneApiService portOneApiService;
 
@@ -36,7 +36,7 @@ public class PaymentsService {
         }
 
         Payments payments = Payments.createPayment(member, order, order.getOrderPrice(), dto.getImpUid());
-        paymentRepository.save(payments);
+        paymentsRepository.save(payments);
         order.payment();
     }
 
@@ -54,6 +54,6 @@ public class PaymentsService {
 
         payments.getMember().cancelPayment(payments.getPaymentPrice());
         payments.getOrder().cancel();
-        paymentRepository.delete(payments);
+        paymentsRepository.delete(payments);
     }
 }

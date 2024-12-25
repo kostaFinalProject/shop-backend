@@ -9,6 +9,7 @@ import com.example.shop.repository.block.BlockRepository;
 import com.example.shop.repository.cart.CartRepository;
 import com.example.shop.repository.comment.CommentRepository;
 import com.example.shop.repository.commentlike.CommentLikeRepository;
+import com.example.shop.repository.deliveryaddress.DeliveryAddressRepository;
 import com.example.shop.repository.discount.DiscountRepository;
 import com.example.shop.repository.follower.FollowerRepository;
 import com.example.shop.repository.item.ItemRepository;
@@ -33,7 +34,7 @@ public class ValidationService {
     private final ItemRepository itemRepository;
     private final ItemSizeRepository itemSizeRepository;
     private final OrderRepository orderRepository;
-    private final PaymentRepository paymentRepository;
+    private final PaymentsRepository paymentsRepository;
     private final SizeRepository sizeRepository;
     private final TagRepository tagRepository;
     private final FollowerRepository followerRepository;
@@ -44,6 +45,7 @@ public class ValidationService {
     private final DiscountRepository discountRepository;
     private final CartRepository cartRepository;
     private final WishListItemRepository wishListItemRepository;
+    private final DeliveryAddressRepository deliveryAddressRepository;
 
     public Member validateMemberById(Long memberId) {
         return memberRepository.findById(memberId)
@@ -82,12 +84,12 @@ public class ValidationService {
     }
 
     public Payments validatePaymentById(Long paymentId) {
-        return paymentRepository.findById(paymentId)
+        return paymentsRepository.findById(paymentId)
                 .orElseThrow(() -> new IllegalArgumentException("결제 기록이 없습니다."));
     }
 
     public Payments findByOrderId(Long orderId) {
-        return paymentRepository.findByOrderId(orderId)
+        return paymentsRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("결제 기록이 없습니다."));
     }
 
@@ -124,6 +126,10 @@ public class ValidationService {
     public WishListItem validateWishListItemById(Long wishListItemId) {
         return wishListItemRepository.findById(wishListItemId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 관심 상품이 없습니다."));
+    }
+    public DeliveryAddress validateDeliveryAddressById(Long deliveryAddressId) {
+        return deliveryAddressRepository.findById(deliveryAddressId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주소입니다."));
     }
 
     public boolean existItemNameInItemCategory(String category, String itemName) {
