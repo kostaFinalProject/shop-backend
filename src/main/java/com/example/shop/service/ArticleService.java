@@ -176,13 +176,12 @@ public class ArticleService {
 
     /** 게시글 전체 조회 */
     @Transactional(readOnly = true)
-    public Page<ArticleSummaryResponseDto> getArticles(Long memberId, String tag, Long itemId, Pageable pageable) {
-        Page<Article> articles = articleRepository.searchArticles(memberId, tag, itemId, pageable);
+    public Page<ArticleSummaryResponseDto> getArticles(Long memberId, String tag, Long itemId,
+                                                       String content, Pageable pageable) {
+        Page<Article> articles = articleRepository.searchArticles(memberId, tag, itemId, content, pageable);
 
         List<ArticleSummaryResponseDto> dtos = articles.stream()
                 .map(article -> {
-                    System.out.println("=======================");
-                    System.out.println(article.getId());
                     Long likeId = validationService.findArticleLikeIdByArticleAndMember(article.getId(), memberId);
 
                     String memberProfileImageUrl = null;

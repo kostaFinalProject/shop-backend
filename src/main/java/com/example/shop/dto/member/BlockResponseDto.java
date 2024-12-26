@@ -9,10 +9,14 @@ import lombok.*;
 public class BlockResponseDto {
     private Long blockId;
     private Long blockMemberId;
-    private String blockMemberName;
+    private String memberProfileImageUrl;
+    private String blockMemberNickname;
+    private String blockMemberIntroduction;
 
-    public static BlockResponseDto createDto(Long blockId, Long blockMemberId, String blockMemberName) {
+    public static BlockResponseDto createDto(Long blockId, Long blockMemberId, String memberProfileImageUrl,
+                                             String blockMemberNickname, String blockMemberIntroduction) {
         return BlockResponseDto.builder().blockId(blockId).blockMemberId(blockMemberId)
-                .blockMemberName(blockMemberName).build();
+                .memberProfileImageUrl(memberProfileImageUrl).blockMemberNickname(blockMemberNickname)
+                .blockMemberIntroduction(blockMemberIntroduction).build();
     }
 }

@@ -81,7 +81,9 @@ public class MemberService {
 
     /** 회원 정보 조회 */
     @Transactional(readOnly = true)
-    public MemberResponseDto getMemberInfo(Long memberId) {
+    public MemberResponseDto
+
+    getMemberInfo(Long memberId) {
         Member findMember = validationService.validateMemberById(memberId);
 
         String phone = findMember.getPhone();
@@ -202,9 +204,17 @@ public class MemberService {
         Page<Follower> followers = memberRepository.findFollowerByMemberId(memberId, fromMemberId, pageable);
 
         List<FollowerListResponseDto> dtos = followers.stream()
-                .map(follower -> FollowerListResponseDto.createDto(follower.getId(),
-                        follower.getFollower().getId(), follower.getFollower().getNickname()))
-                .toList();
+                .map(follower -> {
+                    String memberProfileImageUrl = null;
+                    if (follower.getFollower().getMemberProfileImg() != null) {
+                        memberProfileImageUrl = follower.getFollower().getMemberProfileImg().getImgUrl();
+                    }
+
+                    return FollowerListResponseDto.createDto(follower.getId(),
+                            follower.getFollower().getId(), memberProfileImageUrl,
+                            follower.getFollower().getNickname(), follower.getFollower().getIntroduction(),
+                            follower.getFollowerStatus().name());
+                }).toList();
 
         return new PageImpl<>(dtos, pageable, followers.getTotalElements());
     }
@@ -216,9 +226,17 @@ public class MemberService {
         Page<Follower> followers = memberRepository.findFollowingByMemberId(memberId, fromMemberId,pageable);
 
         List<FollowerListResponseDto> dtos = followers.stream()
-                .map(follower -> FollowerListResponseDto.createDto(follower.getId(),
-                        follower.getFollowee().getId(), follower.getFollowee().getNickname()))
-                .toList();
+                .map(follower -> {
+                    String memberProfileImageUrl = null;
+                    if (follower.getFollowee().getMemberProfileImg() != null) {
+                        memberProfileImageUrl = follower.getFollowee().getMemberProfileImg().getImgUrl();
+                    }
+
+                    return FollowerListResponseDto.createDto(follower.getId(),
+                            follower.getFollowee().getId(), memberProfileImageUrl,
+                            follower.getFollowee().getNickname(), follower.getFollowee().getIntroduction(),
+                            follower.getFollowerStatus().name());
+                }).toList();
 
         return new PageImpl<>(dtos, pageable, followers.getTotalElements());
     }
@@ -230,9 +248,17 @@ public class MemberService {
         Page<Follower> followers = memberRepository.findFollowingRequestByMemberId(memberId, pageable);
 
         List<FollowerListResponseDto> dtos = followers.stream()
-                .map(follower -> FollowerListResponseDto.createDto(follower.getId(),
-                        follower.getFollowee().getId(), follower.getFollowee().getNickname()))
-                .toList();
+                .map(follower -> {
+                    String memberProfileImageUrl = null;
+                    if (follower.getFollowee().getMemberProfileImg() != null) {
+                        memberProfileImageUrl = follower.getFollowee().getMemberProfileImg().getImgUrl();
+                    }
+
+                    return FollowerListResponseDto.createDto(follower.getId(),
+                            follower.getFollowee().getId(), memberProfileImageUrl,
+                            follower.getFollowee().getNickname(), follower.getFollowee().getIntroduction(),
+                            follower.getFollowerStatus().name());
+                }).toList();
 
         return new PageImpl<>(dtos, pageable, followers.getTotalElements());
     }
@@ -244,7 +270,16 @@ public class MemberService {
         Page<Block> blocks = memberRepository.findBlockByMemberId(memberId, pageable);
 
         List<BlockResponseDto> dtos = blocks.stream()
-                .map(block -> BlockResponseDto.createDto(block.getId(), block.getToMember().getId(), block.getToMember().getNickname()))
+                .map(block -> {
+                    String memberProfileImageUrl = null;
+                    if (block.getToMember().getMemberProfileImg() != null) {
+                        memberProfileImageUrl = block.getToMember().getMemberProfileImg().getImgUrl();
+                    }
+
+                    return BlockResponseDto.createDto(block.getId(), block.getToMember().getId(),
+                            memberProfileImageUrl, block.getToMember().getNickname(),
+                            block.getToMember().getIntroduction());
+                })
                 .toList();
 
         return new PageImpl<>(dtos, pageable, blocks.getTotalElements());

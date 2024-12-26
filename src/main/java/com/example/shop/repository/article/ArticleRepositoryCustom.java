@@ -10,6 +10,6 @@ import java.util.Optional;
 public interface ArticleRepositoryCustom {
     Optional<Article> findArticleWithWriterById(Long articleId);
     Page<Comment> findCommentsByArticleId(Long memberId, Long articleId, Pageable pageable);
-    Page<Article> searchArticles(Long memberId, String tag, Long itemId, Pageable pageable);
+    Page<Article> searchArticles(Long memberId, String tag, Long itemId, String content, Pageable pageable);
     Optional<Article> validateArticleAndMemberById(Long articleId, Long memberId);
 }

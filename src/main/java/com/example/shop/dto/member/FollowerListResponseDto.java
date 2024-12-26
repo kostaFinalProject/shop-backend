@@ -9,9 +9,15 @@ import lombok.*;
 public class FollowerListResponseDto {
     private Long followId;
     private Long memberId;
+    private String memberProfileImageUrl;
     private String memberNickname;
+    private String introduction;
+    private String followStatus;
 
-    public static FollowerListResponseDto createDto(Long followId, Long memberId, String memberName) {
-        return FollowerListResponseDto.builder().followId(followId).memberId(memberId).memberNickname(memberName).build();
+    public static FollowerListResponseDto createDto(Long followId, Long memberId, String memberProfileImageUrl,
+                                                    String memberNickname, String introduction, String followStatus) {
+        return FollowerListResponseDto.builder().followId(followId).memberId(memberId)
+                .memberProfileImageUrl(memberProfileImageUrl).memberNickname(memberNickname)
+                .introduction(introduction).followStatus(followStatus).build();
     }
 }
