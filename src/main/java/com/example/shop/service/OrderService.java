@@ -36,7 +36,7 @@ public class OrderService {
                     if (discount != null) {
                         price = discount.getDiscountPrice();
                     }
-                    return OrderItem.createOrderItem(itemSize, price + 5000, orderItemRequestDto.getCount());
+                    return OrderItem.createOrderItem(itemSize, price, orderItemRequestDto.getCount());
                 })
                 .toList();
 

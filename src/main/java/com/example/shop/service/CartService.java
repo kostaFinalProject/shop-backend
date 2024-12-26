@@ -68,9 +68,10 @@ public class CartService {
                         price = discount.getDiscountPrice();
                     }
                     return CartItemDto.createCartItemDto(cart.getId(), cart.getItemSize().getId(),
-                            cart.getItemSize().getItem().getName(), price,
+                            cart.getItemSize().getSize().getSize(), cart.getItemSize().getItem().getName(), price,
                             cart.getItemSize().getItem().getRepItemImage(), cart.getQuantity(),
-                            price * cart.getQuantity());
+                            price * cart.getQuantity(), cart.getItemSize().getItem().getManufacturer(),
+                            cart.getItemSize().getItem().getSeller());
                 })
                 .toList();
     }
@@ -96,7 +97,7 @@ public class CartService {
                     if (discount != null) {
                         price = discount.getDiscountPrice();
                     }
-                    return OrderItem.createOrderItem(itemSize, price + 5000, orderItemRequestDto.getCount());
+                    return OrderItem.createOrderItem(itemSize, price, orderItemRequestDto.getCount());
                 })
                 .toList();
 

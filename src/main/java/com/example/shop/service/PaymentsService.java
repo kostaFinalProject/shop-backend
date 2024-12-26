@@ -29,7 +29,7 @@ public class PaymentsService {
         Payment paymentInfo = portOneApiService.getPaymentInfo(dto.getImpUid());
 
         BigDecimal paymentAmount = paymentInfo.getAmount();
-        BigDecimal orderAmount = BigDecimal.valueOf(order.getOrderPrice());
+        BigDecimal orderAmount = BigDecimal.valueOf(order.getOrderPrice() + 5000);
 
         if (paymentAmount.compareTo(orderAmount) != 0) {
             throw new IllegalStateException("결제 금액이 일치하지 않습니다.");

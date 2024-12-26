@@ -10,28 +10,35 @@ import lombok.NoArgsConstructor;
 public class CartItemDto {
     private Long cartId;
     private Long itemSizeId;
+    private String size;
     private String name;
     private int price;
     private String repImgUrl;
     private int count;
     private int currentPrice;
+    private String manufacturer;
+    private String seller;
 
     @Builder
-    private CartItemDto(Long cartId, Long itemSizeId, String name, int price,
-                        String repImgUrl, int count, int currentPrice) {
+    private CartItemDto(Long cartId, Long itemSizeId, String size, String name, int price,
+                        String repImgUrl, int count, int currentPrice, String manufacturer, String seller) {
         this.cartId = cartId;
         this.itemSizeId = itemSizeId;
+        this.size = size;
         this.name = name;
         this.price = price;
         this.repImgUrl = repImgUrl;
         this.count = count;
         this.currentPrice = currentPrice;
+        this.manufacturer = manufacturer;
+        this.seller = seller;
     }
 
-    public static CartItemDto createCartItemDto(Long cartId, Long itemSizeId, String name,
-                                                int price, String repImgUrl, int count, int currentPrice) {
+    public static CartItemDto createCartItemDto(Long cartId, Long itemSizeId, String size, String name, int price,
+                                                String repImgUrl, int count, int currentPrice, String manufacturer, String seller) {
 
-        return CartItemDto.builder().cartId(cartId).itemSizeId(itemSizeId).name(name)
-                .price(price).repImgUrl(repImgUrl).count(count).currentPrice(currentPrice).build();
+        return CartItemDto.builder().cartId(cartId).itemSizeId(itemSizeId).size(size).name(name)
+                .price(price).repImgUrl(repImgUrl).count(count).currentPrice(currentPrice)
+                .manufacturer(manufacturer).seller(seller).build();
     }
 }
