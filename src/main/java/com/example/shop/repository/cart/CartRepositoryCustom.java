@@ -7,4 +7,5 @@ import java.util.List;
 public interface CartRepositoryCustom {
     List<Cart> findCartDetails(Long memberId, Long itemSizeId);
     List<Cart> findCartDetails(Long memberId);
+    void deleteAllByMemberIdAndItemSizeIdIn(Long memberId, List<Long> itemSizeIds);
 }

@@ -1,14 +1,18 @@
 package com.example.shop.controller;
 
 import com.example.shop.aop.SecurityAspect;
+import com.example.shop.domain.shop.Order;
 import com.example.shop.dto.cart.CartRequestDto;
+import com.example.shop.dto.order.OrderRequestDto;
 import com.example.shop.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,5 +59,17 @@ public class CartController {
         Long memberId = SecurityAspect.getCurrentMemberId();
         cartService.deleteCartItems(memberId, cartIds);
         return ResponseEntity.status(HttpStatus.OK).body("선택한 상품들이 장바구니에서 제거되었습니다.");
+    }
+
+    @PostMapping("/orders")
+    public ResponseEntity<?> saveOrderFromCart(@RequestBody OrderRequestDto dto) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
+        Order order = cartService.saveOrderFromCart(memberId, dto);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("orderId", order.getId());
+        response.put("amount", order.getOrderPrice());
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

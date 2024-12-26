@@ -1,23 +1,25 @@
 package com.example.shop.service;
 
 import com.example.shop.domain.instagram.Member;
-import com.example.shop.domain.shop.Cart;
-import com.example.shop.domain.shop.Discount;
-import com.example.shop.domain.shop.Item;
-import com.example.shop.domain.shop.ItemSize;
+import com.example.shop.domain.shop.*;
 import com.example.shop.dto.cart.CartItemDto;
 import com.example.shop.dto.cart.CartRequestDto;
+import com.example.shop.dto.order.OrderItemRequestDto;
+import com.example.shop.dto.order.OrderRequestDto;
 import com.example.shop.repository.cart.CartRepository;
+import com.example.shop.repository.order.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CartService {
 
+    private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
     private final ValidationService validationService;
 
@@ -80,5 +82,31 @@ public class CartService {
             throw new IllegalArgumentException("아무 상품도 선택되지 않았습니다.");
         }
         cartRepository.deleteAllByMemberIdAndIdIn(memberId, cartItemIds);
+    }
+
+    @Transactional
+    public Order saveOrderFromCart(Long memberId, OrderRequestDto dto) {
+        Member member = validationService.validateMemberById(memberId);
+
+        List<OrderItem> orderItems = dto.getOrderItems().stream()
+                .map(orderItemRequestDto -> {
+                    ItemSize itemSize = validationService.validateItemSizeById(orderItemRequestDto.getItemSizeId());
+                    Discount discount = validationService.findDiscountByItemId(itemSize.getItem().getId());
+
+                    int price = itemSize.getItem().getPrice();
+                    if (discount != null) {
+                        price = discount.getDiscountPrice();
+                    }
+                    return OrderItem.createOrderItem(itemSize, price + 5000, orderItemRequestDto.getCount());
+                })
+                .toList();
+
+        Order order = Order.createOrder(member, orderItems);
+
+        deleteCartItems(memberId, dto.getOrderItems().stream()
+                .map(OrderItemRequestDto::getItemSizeId)
+                .collect(Collectors.toList()));
+
+        return orderRepository.save(order);
     }
 }

@@ -41,4 +41,13 @@ public class CartRepositoryImpl implements CartRepositoryCustom {
                                 .or(cart.itemSize.item.itemStatus.eq(ItemStatus.SOLD_OUT))))
                 .fetch();
     }
+
+    @Override
+    public void deleteAllByMemberIdAndItemSizeIdIn(Long memberId, List<Long> itemSizeIds) {
+        queryFactory
+                .delete(cart)
+                .where(cart.member.id.eq(memberId)
+                        .and(cart.itemSize.id.in(itemSizeIds)))
+                .execute();
+    }
 }
