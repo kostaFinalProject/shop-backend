@@ -39,7 +39,7 @@ public class FollowerRepositoryImpl implements FollowerRepositoryCustom{
                 .join(follower1.followee, followeeMember).fetchJoin()
                 .join(follower1.follower, followerMember).fetchJoin()
                 .where(follower1.followee.eq(followee)
-                        .and(follower1.follower.eq(followerMember)))
+                        .and(follower1.follower.eq(follower)))
                 .fetchOne();
 
         return Optional.ofNullable(result);
