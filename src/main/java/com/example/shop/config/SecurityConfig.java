@@ -126,7 +126,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/wish-lists/**").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/wish-lists").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/orders").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/orders").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/**").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/payments").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/payments/**").authenticated()
