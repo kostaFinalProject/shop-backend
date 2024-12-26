@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.shop.domain.instagram.QMember.member;
 import static com.example.shop.domain.shop.QCart.cart;
@@ -50,4 +51,15 @@ public class CartRepositoryImpl implements CartRepositoryCustom {
                         .and(cart.itemSize.id.in(itemSizeIds)))
                 .execute();
     }
+
+    @Override
+    public Optional<Cart> findByMemberIdAndItemSizeId(Long memberId, Long itemSizeId) {
+        Cart result = queryFactory.selectFrom(cart)
+                .where(cart.member.id.eq(memberId)
+                        .and(cart.itemSize.id.eq(itemSizeId)))
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
 }

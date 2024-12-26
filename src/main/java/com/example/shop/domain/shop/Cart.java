@@ -21,7 +21,7 @@ public class Cart {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "item_size_id")
     private ItemSize itemSize;
 
     private int quantity;

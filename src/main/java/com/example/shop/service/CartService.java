@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,21 +24,19 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ValidationService validationService;
 
-    @Transactional
     public boolean saveOrUpdateCart(Long memberId, CartRequestDto dto) {
         Member member = validationService.validateMemberById(memberId);
         Item item = validationService.validateItemById(dto.getItemId());
         ItemSize itemSize = item.getItemSizeBySize(dto.getSize());
 
-        List<Cart> carts = cartRepository.findCartDetails(memberId, itemSize.getId());
-        Cart existCart = carts.isEmpty() ? null : carts.get(0);
+        Optional<Cart> existingCart = cartRepository.findByMemberIdAndItemSizeId(memberId, itemSize.getId());
 
         if (itemSize.getStockQuantity() < dto.getQuantity()) {
             throw new IllegalArgumentException("수량이 부족합니다.");
         }
 
-        if (existCart != null) {
-            existCart.updateQuantity(existCart.getQuantity() + dto.getQuantity());
+        if (existingCart.isPresent()) {
+            existingCart.get().updateQuantity(existingCart.get().getQuantity() + dto.getQuantity());
             return false;
         } else {
             Cart cart = Cart.createCart(member, itemSize, dto.getQuantity());
@@ -103,7 +102,7 @@ public class CartService {
 
         Order order = Order.createOrder(member, orderItems);
 
-        deleteCartItems(memberId, dto.getOrderItems().stream()
+        cartRepository.deleteAllByMemberIdAndItemSizeIdIn(memberId, dto.getOrderItems().stream()
                 .map(OrderItemRequestDto::getItemSizeId)
                 .collect(Collectors.toList()));
 
