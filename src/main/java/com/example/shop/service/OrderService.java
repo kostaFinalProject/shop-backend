@@ -36,7 +36,7 @@ public class OrderService {
                     if (discount != null) {
                         price = discount.getDiscountPrice();
                     }
-                    return OrderItem.createOrderItem(itemSize, price, orderItemRequestDto.getCount());
+                    return OrderItem.createOrderItem(itemSize, price + 5000, orderItemRequestDto.getCount());
                 })
                 .toList();
 
@@ -73,11 +73,11 @@ public class OrderService {
                             )).collect(Collectors.toList());
 
                     return OrderResponseDto.createDto(paymentsId, orderItems,
-                            order.getOrderPrice(), order.getOrderStatus().name());
+                            order.getOrderPrice(), order.getOrderStatus().name(),
+                            order.getCreateAt());
                 })
                 .collect(Collectors.toList());
 
         return new PageImpl<>(dtos, pageable, orders.getTotalElements());
     }
-
 }

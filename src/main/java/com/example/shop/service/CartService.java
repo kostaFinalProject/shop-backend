@@ -30,6 +30,10 @@ public class CartService {
         List<Cart> carts = cartRepository.findCartDetails(memberId, itemSize.getId());
         Cart existCart = carts.isEmpty() ? null : carts.get(0);
 
+        if (itemSize.getStockQuantity() < dto.getQuantity()) {
+            throw new IllegalArgumentException("수량이 부족합니다.");
+        }
+
         if (existCart != null) {
             existCart.updateQuantity(existCart.getQuantity() + dto.getQuantity());
             return false;
@@ -43,6 +47,11 @@ public class CartService {
     @Transactional
     public void updateCart(Long cartId, int quantity) {
         Cart cart = validationService.validateCartById(cartId);
+
+        if (cart.getItemSize().getStockQuantity() < quantity) {
+            throw new IllegalArgumentException("수량이 부족합니다.");
+        }
+
         cart.updateQuantity(quantity);
     }
 

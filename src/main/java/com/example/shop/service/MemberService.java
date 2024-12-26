@@ -81,9 +81,7 @@ public class MemberService {
 
     /** 회원 정보 조회 */
     @Transactional(readOnly = true)
-    public MemberResponseDto
-
-    getMemberInfo(Long memberId) {
+    public MemberResponseDto getMemberInfo(Long memberId) {
         Member findMember = validationService.validateMemberById(memberId);
 
         String phone = findMember.getPhone();
