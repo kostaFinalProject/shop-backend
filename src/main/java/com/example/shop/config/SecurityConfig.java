@@ -57,6 +57,8 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST,"/api/v1/members/refresh-token").permitAll()
                                 .requestMatchers(HttpMethod.GET, "api/v1/members").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/members/profile/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/members/profile").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/members/profile").authenticated()
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/members/promotion/**")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/members/relegation/**")

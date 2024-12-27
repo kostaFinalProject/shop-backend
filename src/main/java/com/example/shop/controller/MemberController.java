@@ -21,6 +21,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Spring Security 적용하면 @PathVariable("memberId") 제거
  */
@@ -146,6 +149,12 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(memberService.getMemberList(nickname, memberId, pageable));
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<?> getMemberProfile() {
+        Long memberId = SecurityAspect.getCurrentMemberId();
+        return ResponseEntity.status(HttpStatus.OK).body(memberService.getMemberProfileSummary(memberId));
+    }
+
     /** 회원 프로필 조회 */
     @PublicApi
     @GetMapping("/profile/{targetId}")
@@ -194,8 +203,10 @@ public class MemberController {
     @PutMapping("/account-status")
     public ResponseEntity<?> updateMemberAccountStatus() {
         Long memberId = SecurityAspect.getCurrentMemberId();
-        memberService.updateMemberAccountStatus(memberId);
-        return ResponseEntity.status(HttpStatus.OK).body("회원 공개 여부를 수정했습니다.");
+        String status = memberService.updateMemberAccountStatus(memberId);
+        Map<String, String> memberStatus = new HashMap<>();
+        memberStatus.put("status", status);
+        return ResponseEntity.status(HttpStatus.OK).body(memberStatus);
     }
 
     /** 회원 프로필 수정 */

@@ -60,13 +60,15 @@ public class MemberService {
 
     /** 회원 계정 상태 수정 (공개/비공개) */
     @Transactional
-    public void updateMemberAccountStatus(Long memberId) {
+    public String updateMemberAccountStatus(Long memberId) {
         Member member = validationService.validateMemberById(memberId);
 
         if (member.isAccountStatus()) {
             member.updateMemberAccountStatus(AccountStatus.PRIVATE);
+            return "PRIVATE";
         } else {
             member.updateMemberAccountStatus(AccountStatus.PUBLIC);
+            return "PUBLIC";
         }
     }
 
@@ -172,6 +174,19 @@ public class MemberService {
         return MemberProfileResponseDto.createDto(targetMemberId, targetMember.getNickname(), introduction,
                 memberProfileImageUrl, targetMember.getAccountStatus().name(),
                 targetMember.getArticles(), targetMember.getFollowees(), targetMember.getFollowers(), followerId, follow);
+    }
+
+    /** 개인 프로필 조회 */
+    public MemberProfileSummaryResponseDto getMemberProfileSummary(Long memberId) {
+        Member member = validationService.validateMemberById(memberId);
+
+        String memberProfileImageUrl = null;
+        if (member.getMemberProfileImg() != null) {
+            memberProfileImageUrl = member.getMemberProfileImg().getImgUrl();
+        }
+
+        return MemberProfileSummaryResponseDto.createDto(member.getId(), member.getNickname(),
+                member.getIntroduction(), memberProfileImageUrl, member.getAccountStatus().name());
     }
 
     /** 회원의 저장된 게시물 조회 */
