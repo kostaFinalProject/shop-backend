@@ -108,6 +108,8 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
         List<Article> articles = queryFactory.selectFrom(article)
                 .join(article.member, member)
                 .where(combinedConditions)
+                .orderBy(article.likes.desc())
+                .orderBy(article.createAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
