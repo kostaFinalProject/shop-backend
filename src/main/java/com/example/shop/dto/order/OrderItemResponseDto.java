@@ -8,15 +8,20 @@ import lombok.*;
 @Builder
 public class OrderItemResponseDto {
     private Long itemId;
+    private Long itemSizeId;
     private String itemName;
+    private String itemManufacturer;
+    private String itemSeller;
     private String itemSize;
+    private int quantity;
     private int itemPrice;
     private String itemRepImgUrl;
 
-    public static OrderItemResponseDto createDto(Long itemId, String itemName, String itemSize,
-                                                int itemPrice, String itemRepImgUrl) {
+    public static OrderItemResponseDto createDto(Long itemId, Long itemSizeId, String itemName, String itemManufacturer,
+                                                 String itemSeller, String itemSize, int quantity, int itemPrice, String itemRepImgUrl) {
 
-        return OrderItemResponseDto.builder().itemId(itemId).itemName(itemName)
-                .itemSize(itemSize).itemPrice(itemPrice).itemRepImgUrl(itemRepImgUrl).build();
+        return OrderItemResponseDto.builder().itemId(itemId).itemSizeId(itemSizeId).itemName(itemName)
+                .itemManufacturer(itemManufacturer).itemSeller(itemSeller).itemSize(itemSize)
+                .quantity(quantity).itemPrice(itemPrice).itemRepImgUrl(itemRepImgUrl).build();
     }
 }

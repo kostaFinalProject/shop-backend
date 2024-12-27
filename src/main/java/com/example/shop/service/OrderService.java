@@ -66,8 +66,12 @@ public class OrderService {
                     List<OrderItemResponseDto> orderItems = order.getOrderItems().stream()
                             .map(orderItem -> OrderItemResponseDto.createDto(
                                     orderItem.getItemSize().getItem().getId(),
+                                    orderItem.getItemSize().getId(),
                                     orderItem.getItemSize().getItem().getName(),
+                                    orderItem.getItemSize().getItem().getManufacturer(),
+                                    orderItem.getItemSize().getItem().getSeller(),
                                     orderItem.getItemSize().getSize().getSize(),
+                                    orderItem.getCount(),
                                     orderItem.getItemPrice(),
                                     orderItem.getItemSize().getItem().getRepItemImage()
                             )).collect(Collectors.toList());

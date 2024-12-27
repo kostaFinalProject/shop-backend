@@ -136,6 +136,7 @@ public class ItemService {
             memberGrade = member.getGrade().name();
         }
 
+        System.out.println("memberGrade = " + memberGrade);
         Item item = validationService.findItemById(itemId);
 
         List<ItemSizeResponseDto> itemSizesDto = item.getItemSizes().stream()

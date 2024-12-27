@@ -1,6 +1,7 @@
 package com.example.shop.repository.order;
 
 import com.example.shop.domain.shop.Order;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,12 @@ public class OrderRepositoryImpl implements OrderRepositoryCustom {
         List<Order> content = queryFactory.selectFrom(order)
                 .join(order.member, member).fetchJoin()
                 .where(order.member.id.eq(memberId))
+                .orderBy(
+                        new CaseBuilder()
+                                .when(order.updateAt.isNull()).then(order.createAt)
+                                .otherwise(order.updateAt)
+                                .desc()
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

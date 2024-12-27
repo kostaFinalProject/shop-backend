@@ -35,6 +35,8 @@ public class PaymentsService {
             throw new IllegalStateException("결제 금액이 일치하지 않습니다.");
         }
 
+        member.payment(order.getOrderPrice());
+
         Payments payments = Payments.createPayment(member, order, order.getOrderPrice() + 5000, dto.getImpUid());
         paymentsRepository.save(payments);
         order.payment();
@@ -52,7 +54,7 @@ public class PaymentsService {
 
         Payment payment = portOneApiService.cancelPayment(payments.getImpUid());
 
-        payments.getMember().cancelPayment(payments.getPaymentPrice());
+        payments.getMember().cancelPayment(payments.getPaymentPrice() - 5000);
         payments.getOrder().cancel();
         paymentsRepository.delete(payments);
     }
