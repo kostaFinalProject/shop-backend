@@ -59,7 +59,8 @@ public class ArticleController {
                                          @RequestParam(value = "itemId", required = false) Long itemId,
                                          @RequestParam(value = "keyword", required = false) String content,
                                          @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                                         @RequestParam(value = "size", defaultValue = "12", required = false) int size) {
+                                         @RequestParam(value = "size", defaultValue = "12", required = false) int size,
+                                         @RequestParam(value = "sort", defaultValue = "likes", required = false) String sort) {
 
         Long memberId = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -73,7 +74,7 @@ public class ArticleController {
         System.out.println("memberId = " + memberId);
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, tag, itemId, content, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(articleService.getArticles(memberId, tag, itemId, content, sort, pageable));
     }
 
     /** 게시글 단건 조회 */

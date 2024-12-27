@@ -177,8 +177,8 @@ public class ArticleService {
     /** 게시글 전체 조회 */
     @Transactional(readOnly = true)
     public Page<ArticleSummaryResponseDto> getArticles(Long memberId, String tag, Long itemId,
-                                                       String content, Pageable pageable) {
-        Page<Article> articles = articleRepository.searchArticles(memberId, tag, itemId, content, pageable);
+                                                       String content, String sort, Pageable pageable) {
+        Page<Article> articles = articleRepository.searchArticles(memberId, tag, itemId, content, sort, pageable);
 
         List<ArticleSummaryResponseDto> dtos = articles.stream()
                 .map(article -> {

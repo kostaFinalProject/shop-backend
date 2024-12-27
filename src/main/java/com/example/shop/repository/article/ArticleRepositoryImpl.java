@@ -1,6 +1,7 @@
 package com.example.shop.repository.article;
 
 import com.example.shop.domain.instagram.*;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -83,7 +85,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
     }
 
     @Override
-    public Page<Article> searchArticles(Long memberId, String tag, Long itemId, String content, Pageable pageable) {
+    public Page<Article> searchArticles(Long memberId, String tag, Long itemId, String content, String sortType, Pageable pageable) {
         BooleanExpression baseCondition;
         BooleanExpression commonCondition = article.articleStatus.eq(ArticleStatus.ACTIVE);
 
@@ -105,21 +107,30 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom{
         BooleanExpression contentCondition = hasContent(content);
         BooleanExpression combinedConditions = combineConditions(baseCondition, tagCondition, itemCondition, contentCondition);
 
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+        if ("likes".equalsIgnoreCase(sortType)) {
+            orderSpecifiers.add(article.likes.desc());
+        } else if ("newest".equalsIgnoreCase(sortType)) {
+            orderSpecifiers.add(article.createAt.desc());
+        }
+
+        // Query 생성
         List<Article> articles = queryFactory.selectFrom(article)
                 .join(article.member, member)
                 .where(combinedConditions)
-                .orderBy(article.likes.desc())
-                .orderBy(article.createAt.desc())
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        // 카운트 쿼리
         JPAQuery<Long> countQuery = queryFactory.select(article.count())
                 .from(article)
                 .where(combinedConditions);
 
         return PageableExecutionUtils.getPage(articles, pageable, countQuery::fetchOne);
     }
+
 
     @Override
     public Optional<Article> validateArticleAndMemberById(Long articleId, Long memberId) {
