@@ -95,7 +95,6 @@ public class ItemService {
             itemSize.removeStock(itemSize.getStockQuantity());
         }
 
-        imageService.deleteItemImg(item);
         item.deleteItem();
     }
 
@@ -148,17 +147,20 @@ public class ItemService {
                 .map(ItemImg::getImgUrl)
                 .toList();
 
+        Long discountId= null;
         int discountPercent = 0;
         int discountPrice = item.getPrice();
         if (discountRepository.existsDiscountByItemId(itemId)) {
             Discount discount = discountRepository.findDiscountByItemId(item.getId())
                     .orElseThrow(() -> new IllegalArgumentException("할인 진행중이 아닙니다."));
 
+            discountId = discount.getId();
             discountPercent = discount.getDiscountPercent();
             discountPrice = discount.getDiscountPrice();
         }
 
-        return ItemDetailResponseDto.createDto(itemId, item.getItemCategory().getName(), item.getManufacturer(),
+        return ItemDetailResponseDto.createDto(itemId, discountId, item.getItemCategory().getParentItemCategory().getName(),
+                item.getItemCategory().getName(), item.getManufacturer(),
                 item.getName(), item.getPrice(), item.getSeller(), itemSizesDto, itemImageUrls,
                 item.getItemDetailImg().getImgUrl(), discountPercent, discountPrice, memberGrade);
     }

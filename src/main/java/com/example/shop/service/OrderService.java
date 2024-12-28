@@ -73,10 +73,11 @@ public class OrderService {
                                     orderItem.getItemSize().getSize().getSize(),
                                     orderItem.getCount(),
                                     orderItem.getItemPrice(),
+                                    orderItem.getItemSize().getItem().getItemStatus().name(),
                                     orderItem.getItemSize().getItem().getRepItemImage()
                             )).collect(Collectors.toList());
 
-                    return OrderResponseDto.createDto(paymentsId, orderItems,
+                    return OrderResponseDto.createDto(paymentsId, order.getId(), orderItems,
                             order.getOrderPrice(), order.getOrderStatus().name(),
                             order.getCreateAt());
                 })

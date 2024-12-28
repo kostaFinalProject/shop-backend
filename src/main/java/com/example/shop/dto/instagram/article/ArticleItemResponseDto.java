@@ -11,9 +11,11 @@ public class ArticleItemResponseDto {
     private String itemName;
     private int price;
     private String imageUrl;
+    private String itemStatus;
 
-    public static ArticleItemResponseDto createDto(Long itemId, String itemName, int price, String imageUrl) {
+    public static ArticleItemResponseDto createDto(Long itemId, String itemName, int price,
+                                                   String imageUrl, String itemStatus) {
         return ArticleItemResponseDto.builder().itemId(itemId).itemName(itemName)
-                .price(price).imageUrl(imageUrl).build();
+                .price(price).imageUrl(imageUrl).itemStatus(itemStatus).build();
     }
 }

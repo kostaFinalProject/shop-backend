@@ -11,14 +11,15 @@ import java.util.List;
 @Builder
 public class OrderResponseDto {
     private Long paymentsId;
+    private Long orderId;
     List<OrderItemResponseDto> orderItems;
     private int orderPrice;
     private String orderStatus;
     private LocalDateTime orderTime;
 
-    public static OrderResponseDto createDto(Long paymentsId, List<OrderItemResponseDto> orderItems,
+    public static OrderResponseDto createDto(Long paymentsId, Long orderId, List<OrderItemResponseDto> orderItems,
                                              int orderPrice, String orderStatus, LocalDateTime orderTime) {
-        return OrderResponseDto.builder().paymentsId(paymentsId).orderItems(orderItems)
+        return OrderResponseDto.builder().paymentsId(paymentsId).orderId(orderId).orderItems(orderItems)
                 .orderPrice(orderPrice).orderStatus(orderStatus).orderTime(orderTime).build();
     }
 }

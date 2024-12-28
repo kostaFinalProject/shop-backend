@@ -162,7 +162,7 @@ public class ArticleService {
                         }
 
                         return ArticleItemResponseDto.createDto(articleItem.getItem().getId(), articleItem.getItem().getName(),
-                                price, articleItem.getItem().getRepItemImage());
+                                price, articleItem.getItem().getRepItemImage(), articleItem.getItem().getItemStatus().name());
                     })
                     .toList();
         }

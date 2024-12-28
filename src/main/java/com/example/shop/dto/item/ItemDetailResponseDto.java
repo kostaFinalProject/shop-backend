@@ -10,6 +10,8 @@ import java.util.List;
 @Builder
 public class ItemDetailResponseDto {
     private Long itemId;
+    private Long discountId;
+    private String parentCategory;
     private String itemCategory;
     private String manufacturer;
     private String name;
@@ -22,12 +24,12 @@ public class ItemDetailResponseDto {
     private int discountPrice;
     private String memberGrade;
 
-    public static ItemDetailResponseDto createDto(Long itemId, String itemCategory, String manufacturer, String name,
+    public static ItemDetailResponseDto createDto(Long itemId, Long discountId, String parentCategory, String itemCategory, String manufacturer, String name,
                                                   int price, String seller, List<ItemSizeResponseDto> itemSizes, List<String> imageUrls,
                                                   String itemDetailImageUrl, int discountPercent, int discountPrice, String memberGrade) {
 
-        return ItemDetailResponseDto.builder().itemId(itemId).itemCategory(itemCategory)
-                .manufacturer(manufacturer).name(name).price(price).seller(seller)
+        return ItemDetailResponseDto.builder().itemId(itemId).discountId(discountId).parentCategory(parentCategory)
+                .itemCategory(itemCategory).manufacturer(manufacturer).name(name).price(price).seller(seller)
                 .itemSizes(itemSizes).imageUrls(imageUrls).itemDetailImageUrl(itemDetailImageUrl)
                 .discountPercent(discountPercent).discountPrice(discountPrice).memberGrade(memberGrade).build();
     }

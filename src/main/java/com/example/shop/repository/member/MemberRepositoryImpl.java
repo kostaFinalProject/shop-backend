@@ -2,6 +2,7 @@ package com.example.shop.repository.member;
 
 import com.example.shop.domain.instagram.*;
 import com.example.shop.domain.shop.Item;
+import com.example.shop.domain.shop.ItemStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -102,6 +103,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                     .where(
                             article.member.id.eq(targetMemberId)
                                     .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(articleItem.item.itemStatus.eq(ItemStatus.ACTIVE)
+                                            .or(articleItem.item.itemStatus.eq(ItemStatus.SOLD_OUT)))
                                     .and(article.member.accountStatus.eq(AccountStatus.PUBLIC))
                     )
                     .offset(pageable.getOffset())
@@ -115,6 +118,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                     .where(
                             article.member.id.eq(targetMemberId)
                                     .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(articleItem.item.itemStatus.eq(ItemStatus.ACTIVE)
+                                            .or(articleItem.item.itemStatus.eq(ItemStatus.SOLD_OUT)))
                                     .and(article.member.accountStatus.eq(AccountStatus.PUBLIC))
                     );
         } else {
@@ -128,6 +133,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                     .where(
                             article.member.id.eq(targetMemberId)
                                     .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(articleItem.item.itemStatus.eq(ItemStatus.ACTIVE)
+                                            .or(articleItem.item.itemStatus.eq(ItemStatus.SOLD_OUT)))
                                     .and(article.member.id.notIn(excludeMemberIds))
                                     .and(
                                             article.member.accountStatus.eq(AccountStatus.PUBLIC)
@@ -146,6 +153,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                     .where(
                             article.member.id.eq(targetMemberId)
                                     .and(article.articleStatus.eq(ArticleStatus.ACTIVE))
+                                    .and(articleItem.item.itemStatus.eq(ItemStatus.ACTIVE)
+                                            .or(articleItem.item.itemStatus.eq(ItemStatus.SOLD_OUT)))
                                     .and(article.member.id.notIn(excludeMemberIds))
                                     .and(
                                             article.member.accountStatus.eq(AccountStatus.PUBLIC)
@@ -226,7 +235,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .join(follower1.followee, followeeMember).fetchJoin()
                 .join(follower1.follower, followerMember).fetchJoin()
                 .where(follower1.followee.id.eq(targetMemberId)
-                        .and(follower1.followee.id.notIn(excludeMembersId))
+                        .and(follower1.follower.id.notIn(excludeMembersId))
                         .and(
                                 follower1.followee.accountStatus.eq(AccountStatus.PUBLIC)
                                         .or(follower1.followee.id.in(followList))
@@ -241,7 +250,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .select(follower1.count())
                 .from(follower1)
                 .where(follower1.followee.id.eq(targetMemberId)
-                        .and(follower1.followee.id.notIn(excludeMembersId))
+                        .and(follower1.follower.id.notIn(excludeMembersId))
                         .and(
                                 follower1.followee.accountStatus.eq(AccountStatus.PUBLIC)
                                         .or(follower1.followee.id.in(followList))
@@ -264,7 +273,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .join(follower1.followee, followeeMember).fetchJoin()
                 .join(follower1.follower, followerMember).fetchJoin()
                 .where(follower1.follower.id.eq(targetMemberId)
-                        .and(follower1.follower.id.notIn(excludeMembersId))
+                        .and(follower1.followee.id.notIn(excludeMembersId))
                         .and(
                                 followeeMember.accountStatus.eq(AccountStatus.PUBLIC)
                                         .or(follower1.follower.id.in(followList))
@@ -279,7 +288,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .select(follower1.count())
                 .from(follower1)
                 .where(follower1.follower.id.eq(targetMemberId)
-                        .and(follower1.follower.id.notIn(excludeMembersId))
+                        .and(follower1.followee.id.notIn(excludeMembersId))
                         .and(
                                 followeeMember.accountStatus.eq(AccountStatus.PUBLIC)
                                         .or(follower1.follower.id.in(followList))
@@ -292,15 +301,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
     @Override
     public Page<Follower> findFollowingRequestByMemberId(Long memberId, Pageable pageable) {
-
         QMember followeeMember = new QMember("followeeMember");
         QMember followerMember = new QMember("followerMember");
+        List<Long> excludedMemberIds = getExcludedMemberIds(memberId);
 
         List<Follower> followerList = queryFactory.selectFrom(follower1)
                 .join(follower1.followee, followeeMember).fetchJoin()
                 .join(follower1.follower, followerMember).fetchJoin()
                 .where(follower1.follower.id.eq(memberId)
-                        .and(follower1.followerStatus.eq(FollowerStatus.REQUEST)))
+                        .and(follower1.followerStatus.eq(FollowerStatus.REQUEST))
+                        .and(follower1.followee.id.notIn(excludedMemberIds)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -308,8 +318,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(follower1.count())
                 .from(follower1)
-                .where(follower1.followee.id.eq(memberId)
-                        .and(follower1.followerStatus.eq(FollowerStatus.REQUEST)));
+                .where(follower1.follower.id.eq(memberId)
+                        .and(follower1.followerStatus.eq(FollowerStatus.REQUEST))
+                        .and(follower1.followee.id.notIn(excludedMemberIds)));
 
         return PageableExecutionUtils.getPage(followerList, pageable, countQuery::fetchOne);
     }

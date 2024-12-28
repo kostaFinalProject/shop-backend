@@ -21,6 +21,7 @@ public class QuestionSummaryResponseDto {
     private LocalDateTime createAt;
     private String questionStatus;
     private String content;
+    private String memberGrade;
 
     public static QuestionSummaryResponseDto readAllDto(Long questionId, Long memberId, Long itemId, String repImgYn, String memberNickname,
                                                         String title, LocalDateTime createAt,
@@ -32,9 +33,9 @@ public class QuestionSummaryResponseDto {
 
     public static QuestionSummaryResponseDto readDetailDto(Long questionId, Long memberId, Long itemId, String repImgYn, String itemName, int itemPrice,
                                                            String title, String memberNickname, String isMe, LocalDateTime createAt,
-                                                           String questionStatus, String content){
+                                                           String questionStatus, String content, String memberGrade){
         return QuestionSummaryResponseDto.builder().questionId(questionId).memberId(memberId).itemId(itemId)
                 .repImgYn(repImgYn).itemName(itemName).itemPrice(itemPrice).title(title).memberNickname(memberNickname)
-                .isMe(isMe).createAt(createAt).questionStatus(questionStatus).content(content).build();
+                .isMe(isMe).createAt(createAt).questionStatus(questionStatus).content(content).memberGrade(memberGrade).build();
     }
 }

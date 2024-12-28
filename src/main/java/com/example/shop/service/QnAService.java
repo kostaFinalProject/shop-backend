@@ -113,8 +113,10 @@ public class QnAService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 질문을 찾을 수 없습니다."));
 
         Member member = null;
+        String memberGrade = null;
         if (memberId != null) {
             member = validationService.validateMemberById(memberId);
+            memberGrade = member.getGrade().name();
         }
 
         String isMe = "Not Me";
@@ -134,7 +136,8 @@ public class QnAService {
                 isMe,
                 question.getCreateAt(),
                 question.getQuestionStatus().name(),
-                question.getContent()
+                question.getContent(),
+                memberGrade
         );
     }
 

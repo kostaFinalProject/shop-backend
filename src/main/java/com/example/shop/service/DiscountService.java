@@ -16,7 +16,7 @@ public class DiscountService {
     private final ValidationService validationService;
 
     @Transactional
-    public void saveDiscount(Long itemId, DiscountRequestDto dto) {
+    public Discount saveDiscount(Long itemId, DiscountRequestDto dto) {
         if (discountRepository.existsDiscountByItemId(itemId)) {
             throw new IllegalArgumentException("이미 할인이 진행중입니다.");
         }
@@ -24,6 +24,8 @@ public class DiscountService {
         Item item = validationService.validateItemById(itemId);
         Discount discount = Discount.createDiscount(item, dto.getDiscountPercent());
         discountRepository.save(discount);
+
+        return discount;
     }
 
     @Transactional
