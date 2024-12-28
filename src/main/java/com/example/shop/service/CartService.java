@@ -67,8 +67,9 @@ public class CartService {
                     if (discount != null) {
                         price = discount.getDiscountPrice();
                     }
-                    return CartItemDto.createCartItemDto(cart.getId(), cart.getItemSize().getId(),
-                            cart.getItemSize().getSize().getSize(), cart.getItemSize().getItem().getName(), price,
+                    return CartItemDto.createCartItemDto(cart.getId(), cart.getItemSize().getItem().getId(),
+                            cart.getItemSize().getId(), cart.getItemSize().getSize().getSize(),
+                            cart.getItemSize().getItem().getName(), price,
                             cart.getItemSize().getItem().getRepItemImage(), cart.getQuantity(),
                             price * cart.getQuantity(), cart.getItemSize().getItem().getManufacturer(),
                             cart.getItemSize().getItem().getSeller());

@@ -138,7 +138,17 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/payments/**").authenticated()
                                 .requestMatchers(HttpMethod.POST,"/api/v1/delivery-address").authenticated()
                                 .requestMatchers(HttpMethod.GET,  "/api/v1/delivery-address").authenticated()
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/delivery-address/**").authenticated())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/delivery-address/**").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/qna").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/qna/answer")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/qna/question/**").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/qna/answer/**")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/qna/question/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/qna/answer/**")
+                                .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/qna/**").permitAll())
                 .oauth2Login(oauth ->
                         oauth
                                 .loginPage("http://localhost:3000/login")
