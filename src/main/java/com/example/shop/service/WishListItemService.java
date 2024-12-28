@@ -51,8 +51,14 @@ public class WishListItemService {
                         price = discount.getDiscountPrice();
                     }
 
+                    int points = price / 100;
+
                     return WishListItemResponseDto.createDto(wishListItem.getId(), wishListItem.getItem().getId(),
-                            wishListItem.getItem().getName(), price,
+                            wishListItem.getItem().getManufacturer(),
+                            wishListItem.getItem().getName(),
+                            price,
+                            wishListItem.getItem().getSeller(),
+                            points,
                             wishListItem.getItem().getRepItemImage());
                 })
                 .toList();
