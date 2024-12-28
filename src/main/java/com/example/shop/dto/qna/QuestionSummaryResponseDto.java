@@ -15,24 +15,25 @@ public class QuestionSummaryResponseDto {
     private String itemName;
     private int itemPrice;
     private String title;
+    private String memberNickname;
     private String isMe;
     private LocalDateTime createAt;
     private String questionStatus;
     private String content;
 
-    public static QuestionSummaryResponseDto readAllDto(Long questionId, Long memberId, String repImgYn,
+    public static QuestionSummaryResponseDto readAllDto(Long questionId, Long memberId, String repImgYn, String memberNickname,
                                                         String title, LocalDateTime createAt,
                                                         String questionStatus){
         return QuestionSummaryResponseDto.builder().questionId(questionId).memberId(memberId)
-                .repImgYn(repImgYn).title(title)
+                .repImgYn(repImgYn).memberNickname(memberNickname).title(title)
                 .createAt(createAt).questionStatus(questionStatus).build();
     }
 
     public static QuestionSummaryResponseDto readDetailDto(Long questionId, Long memberId, String repImgYn, String itemName, int itemPrice,
-                                                           String title, String isMe, LocalDateTime createAt,
+                                                           String title, String memberNickname, String isMe, LocalDateTime createAt,
                                                            String questionStatus, String content){
         return QuestionSummaryResponseDto.builder().questionId(questionId).memberId(memberId)
-                .repImgYn(repImgYn).itemName(itemName).itemPrice(itemPrice).title(title)
+                .repImgYn(repImgYn).itemName(itemName).itemPrice(itemPrice).title(title).memberNickname(memberNickname)
                 .isMe(isMe).createAt(createAt).questionStatus(questionStatus).content(content).build();
     }
 }

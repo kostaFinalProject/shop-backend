@@ -94,6 +94,7 @@ public class QnAService {
                             question.getId(),
                             member.getId(),
                             item.getRepItemImage(),
+                            member.getNickname(),
                             question.getTitle(),
                             question.getCreateAt(),
                             question.getQuestionStatus().name()
@@ -127,6 +128,7 @@ public class QnAService {
                 question.getItem().getName(),
                 question.getItem().getPrice(),
                 question.getTitle(),
+                question.getMember().getNickname(),
                 isMe,
                 question.getCreateAt(),
                 question.getQuestionStatus().name(),
