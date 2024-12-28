@@ -16,7 +16,7 @@ public class ArticleCollectionService {
     private final ValidationService validationService;
 
     @Transactional
-    public void saveArticleCollection(Long memberId, Long articleId) {
+    public Long saveArticleCollection(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);
         Article article = validationService.validateArticleById(articleId);
 
@@ -25,7 +25,8 @@ public class ArticleCollectionService {
         }
 
         ArticleCollection articleCollection = ArticleCollection.createArticleCollection(member, article);
-        articleCollectionRepository.save(articleCollection);
+        ArticleCollection savedArticleCollection = articleCollectionRepository.save(articleCollection);
+        return savedArticleCollection.getId();
     }
 
     @Transactional

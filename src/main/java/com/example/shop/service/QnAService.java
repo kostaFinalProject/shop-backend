@@ -83,7 +83,7 @@ public class QnAService {
     /** QnA 게시물 전체 조회 */
     @Transactional(readOnly = true)
     public Page<QuestionSummaryResponseDto> getQnAQuestion(Pageable pageable) {
-        Page<Question> questions=questionRepository.findAll(pageable);
+        Page<Question> questions = questionRepository.findQuestion(pageable);
 
         List<QuestionSummaryResponseDto> dtos = questions.stream()
                 .map(question -> {
@@ -93,6 +93,7 @@ public class QnAService {
                     return QuestionSummaryResponseDto.readAllDto(
                             question.getId(),
                             member.getId(),
+                            item.getId(),
                             item.getRepItemImage(),
                             member.getNickname(),
                             question.getTitle(),
@@ -124,6 +125,7 @@ public class QnAService {
         return QuestionSummaryResponseDto.readDetailDto(
                 question.getId(),
                 question.getMember().getId(),
+                question.getItem().getId(),
                 question.getItem().getRepItemImage(),
                 question.getItem().getName(),
                 question.getItem().getPrice(),

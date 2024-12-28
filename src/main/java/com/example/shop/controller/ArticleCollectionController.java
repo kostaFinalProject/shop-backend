@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Spring Security 적용하면 @PathVariable("memberId") 제거
  */
@@ -21,8 +24,10 @@ public class ArticleCollectionController {
     @PostMapping("/{articleId}")
     public ResponseEntity<?> saveArticleCollection(@PathVariable("articleId") Long articleId) {
         Long memberId = SecurityAspect.getCurrentMemberId();
-        articleCollectionService.saveArticleCollection(memberId, articleId);
-        return ResponseEntity.status(HttpStatus.OK).body("게시물 컬렉션에 추가했습니다.");
+        Long articleCollectionId = articleCollectionService.saveArticleCollection(memberId, articleId);
+        Map<String, Long> articleCollectionMap = new HashMap<>();
+        articleCollectionMap.put("articleId", articleCollectionId);
+        return ResponseEntity.status(HttpStatus.OK).body(articleCollectionMap);
     }
 
     /** 저장된 게시물 삭제 */
