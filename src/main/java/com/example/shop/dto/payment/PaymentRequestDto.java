@@ -8,4 +8,5 @@ public class PaymentRequestDto {
     private String impUid;
     private Long orderId;
     private int orderPrice;
+    private int usePoints;
 }

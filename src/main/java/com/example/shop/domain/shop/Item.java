@@ -30,6 +30,7 @@ public class Item extends BaseEntity {
     private String seller;
     private String name;
     private int price;
+    private int orderCount;
     private int allStockQuantity;
 
     @Enumerated(EnumType.STRING)
@@ -57,6 +58,7 @@ public class Item extends BaseEntity {
         this.itemImages = itemImages;
         this.itemDetailImg = itemDetailImg;
         this.itemStatus = ItemStatus.ACTIVE;
+        this.orderCount = 0;
     }
 
     public static Item createItem(ItemCategory itemCategory, String manufacturer, String name, String seller,
@@ -149,5 +151,13 @@ public class Item extends BaseEntity {
                 .findFirst()
                 .map(ItemImg::getImgUrl)
                 .orElse(getItemImages().get(0).getImgUrl());
+    }
+
+    public void increaseOrderCount() {
+        this.orderCount++;
+    }
+
+    public void decreaseOrderCount() {
+        this.orderCount--;
     }
 }

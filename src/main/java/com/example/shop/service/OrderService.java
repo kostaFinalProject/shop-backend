@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,9 +59,14 @@ public class OrderService {
                 .map(order -> {
 
                     Long paymentsId = null;
+                    int usePoints = 0;
+                    int price = order.getOrderPrice();
+
                     if (order.getOrderStatus().equals(OrderStatus.PAID)) {
                         Payments payments = validationService.findByOrderId(order.getId());
                         paymentsId = payments.getId();
+                        usePoints = payments.getUsePoints();
+                        price = payments.getPaymentPrice();
                     }
 
                     List<OrderItemResponseDto> orderItems = order.getOrderItems().stream()
@@ -78,7 +84,7 @@ public class OrderService {
                             )).collect(Collectors.toList());
 
                     return OrderResponseDto.createDto(paymentsId, order.getId(), orderItems,
-                            order.getOrderPrice(), order.getOrderStatus().name(),
+                            price, usePoints, order.getOrderStatus().name(),
                             order.getCreateAt());
                 })
                 .collect(Collectors.toList());

@@ -14,12 +14,13 @@ public class OrderResponseDto {
     private Long orderId;
     List<OrderItemResponseDto> orderItems;
     private int orderPrice;
+    private int usePoints;
     private String orderStatus;
     private LocalDateTime orderTime;
 
     public static OrderResponseDto createDto(Long paymentsId, Long orderId, List<OrderItemResponseDto> orderItems,
-                                             int orderPrice, String orderStatus, LocalDateTime orderTime) {
+                                             int orderPrice, int usePoints, String orderStatus, LocalDateTime orderTime) {
         return OrderResponseDto.builder().paymentsId(paymentsId).orderId(orderId).orderItems(orderItems)
-                .orderPrice(orderPrice).orderStatus(orderStatus).orderTime(orderTime).build();
+                .orderPrice(orderPrice).usePoints(usePoints).orderStatus(orderStatus).orderTime(orderTime).build();
     }
 }

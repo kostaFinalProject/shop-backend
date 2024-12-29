@@ -20,6 +20,8 @@ import com.example.shop.repository.wishlist.WishListItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * 각종 엔티티 검증 서비스
  */
@@ -91,6 +93,10 @@ public class ValidationService {
     public Payments findByOrderId(Long orderId) {
         return paymentsRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("결제 기록이 없습니다."));
+    }
+
+    public Optional<Payments> findPaymentsByOrder(Long orderId) {
+        return paymentsRepository.findByOrderId(orderId);
     }
 
     public Item validateItemById(Long itemId) {

@@ -29,15 +29,19 @@ public class PaymentsService {
         Payment paymentInfo = portOneApiService.getPaymentInfo(dto.getImpUid());
 
         BigDecimal paymentAmount = paymentInfo.getAmount();
-        BigDecimal orderAmount = BigDecimal.valueOf(order.getOrderPrice() + 5000);
+        BigDecimal orderAmount = BigDecimal.valueOf(dto.getOrderPrice());
 
         if (paymentAmount.compareTo(orderAmount) != 0) {
             throw new IllegalStateException("결제 금액이 일치하지 않습니다.");
         }
 
-        member.payment(order.getOrderPrice());
+        if (dto.getUsePoints() == 0) {
+            member.payment(order.getOrderPrice());
+        } else {
+            member.usePoints(dto.getUsePoints());
+        }
 
-        Payments payments = Payments.createPayment(member, order, order.getOrderPrice() + 5000, dto.getImpUid());
+        Payments payments = Payments.createPayment(member, order, dto.getOrderPrice(), dto.getUsePoints(), dto.getImpUid());
         paymentsRepository.save(payments);
         order.payment();
     }
@@ -54,7 +58,11 @@ public class PaymentsService {
 
         Payment payment = portOneApiService.cancelPayment(payments.getImpUid());
 
-        payments.getMember().cancelPayment(payments.getPaymentPrice() - 5000);
+        if (payments.getUsePoints() == 0) {
+            payments.getMember().cancelPayment(payments.getOrder().getOrderPrice());
+        } else {
+            payments.getMember().cancelPoints(payments.getUsePoints());
+        }
         payments.getOrder().cancel();
         paymentsRepository.delete(payments);
     }

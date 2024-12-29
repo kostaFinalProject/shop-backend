@@ -44,12 +44,13 @@ public class OrderItem {
     /** 연관 관계 메서드 */
     protected void setOrder(Order order) {
         this.order = order;
+        this.itemSize.getItem().increaseOrderCount();
         if (!order.getOrderItems().contains(this)) {
             order.getOrderItems().add(this);
         }
     }
 
-    /** 주문 상품 당 가격*/
+    /** 주문 상품 당 가격 */
     public int getTotalPrice() {
         return getItemPrice() * getCount();
     }
@@ -57,5 +58,6 @@ public class OrderItem {
     /** 주문 취소 */
     public void cancel() {
         getItemSize().addStock(count);
+        this.itemSize.getItem().decreaseOrderCount();
     }
 }
