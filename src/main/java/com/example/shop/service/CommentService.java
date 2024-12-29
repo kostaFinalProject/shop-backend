@@ -28,6 +28,7 @@ public class CommentService {
     @Transactional
     public void saveReply(Long memberId, Long commentId, CommentRequestDto dto, MultipartFile file) {
         Member member = validationService.validateMemberById(memberId);
+        member.plusPoints(50);
         Comment parentComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("등록된 댓글이 아닙니다."));
 
@@ -137,6 +138,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long memberId, Long commentId) {
         Member member = validationService.validateMemberById(memberId);
+        member.minusPoints(50);
         Comment comment = validationService.validateCommentById(commentId);
 
         if (member.getGrade() == Grade.USER && !comment.getMember().equals(member)) {

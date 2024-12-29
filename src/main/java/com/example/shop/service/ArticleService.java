@@ -38,6 +38,7 @@ public class ArticleService {
     @Transactional
     public void saveArticle(Long memberId, ArticleRequestDto dto, List<MultipartFile> articleImages) {
         Member member = validationService.validateMemberById(memberId);
+        member.plusPoints(100);
 
         if (articleImages == null || articleImages.isEmpty() || articleImages.stream().allMatch(MultipartFile::isEmpty)) {
             throw new IllegalArgumentException("게시글에는 최소 1장의 이미지가 필요합니다.");
@@ -67,6 +68,7 @@ public class ArticleService {
     @Transactional
     public void saveComment(Long memberId, Long articleId, CommentRequestDto dto, MultipartFile file) {
         Member member = validationService.validateMemberById(memberId);
+        member.plusPoints(50);
         Article article = validationService.validateArticleById(articleId);
 
         CommentImg commentImg = null;
@@ -269,6 +271,7 @@ public class ArticleService {
     @Transactional
     public void deleteArticle(Long memberId, Long articleId) {
         Member member = validationService.validateMemberById(memberId);
+        member.minusPoints(100);
         Article article = validationService.validateArticleById(articleId);
 
         if (member.getGrade() == Grade.USER && !article.getMember().equals(member)) {

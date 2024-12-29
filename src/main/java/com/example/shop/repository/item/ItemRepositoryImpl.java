@@ -104,6 +104,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                     .when(discount.isNotNull()).then(discount.discountPercent)
                     .otherwise(0)
                     .desc();
+        } else if ("order".equals(sortCondition)) {
+            return item.orderCount.desc();
         }
 
         return item.createAt.desc();

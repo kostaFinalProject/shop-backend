@@ -38,7 +38,7 @@ public class PaymentsService {
         if (dto.getUsePoints() == 0) {
             member.payment(order.getOrderPrice());
         } else {
-            member.usePoints(dto.getUsePoints());
+            member.minusPoints(dto.getUsePoints());
         }
 
         Payments payments = Payments.createPayment(member, order, dto.getOrderPrice(), dto.getUsePoints(), dto.getImpUid());
@@ -61,7 +61,7 @@ public class PaymentsService {
         if (payments.getUsePoints() == 0) {
             payments.getMember().cancelPayment(payments.getOrder().getOrderPrice());
         } else {
-            payments.getMember().cancelPoints(payments.getUsePoints());
+            payments.getMember().plusPoints(payments.getUsePoints());
         }
         payments.getOrder().cancel();
         paymentsRepository.delete(payments);

@@ -191,11 +191,15 @@ public class Member extends BaseEntity {
         return accountStatus == AccountStatus.PUBLIC;
     }
 
-    public void usePoints(int points) {
-        this.points -= points;
+    public void minusPoints(int points) {
+        int restPoints = this.points - points;
+        if (restPoints < 0) {
+            restPoints = 0;
+        }
+        this.points = restPoints;
     }
 
-    public void cancelPoints(int points) {
+    public void plusPoints(int points) {
         this.points += points;
     }
 }
