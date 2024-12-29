@@ -199,6 +199,14 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body("회원수정에 성공했습니다.");
     }
 
+    /** oAuth 회원 정보 수정 */
+    @PutMapping("/oauth")
+    public ResponseEntity<?> oauthUpdateMember(@RequestBody MemberUpdateDto dto) {
+        Long memberId = SecurityAspect.getCurrentMemberId();
+        memberService.oauthUpdateMemberInfo(memberId, dto);
+        return ResponseEntity.status(HttpStatus.OK).body("회원수정에 성공했습니다.");
+    }
+
     /** 회원 공개 여부 상태 수정 */
     @PutMapping("/account-status")
     public ResponseEntity<?> updateMemberAccountStatus() {

@@ -63,6 +63,8 @@ public class SecurityConfig {
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/members/relegation/**")
                                 .hasAnyAuthority("SUPER_ADMIN", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/members").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/members/oauth").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/members/followers/**").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/members/followees/**").authenticated()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/members/requests").authenticated()

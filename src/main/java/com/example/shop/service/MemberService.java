@@ -53,9 +53,33 @@ public class MemberService {
     @Transactional
     public void updateMemberInfo(Long memberId, MemberUpdateDto dto) {
         Member member = validationService.validateMemberById(memberId);
+        if (memberRepository.existsByUserIdAndIdNot(member.getUserId(), memberId)) {
+            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
+        }
 
-        Address newAddress = Address.createAddress(dto.getPostCode(), dto.getRoadAddress(), dto.getRoadAddress());
-        member.updateMemberInfo(dto.getName(), dto.getNickname(), dto.getEmail(), dto.getPhone(), newAddress);
+        if (memberRepository.existsByNicknameAndIdNot(dto.getNickname(), memberId)) {
+            throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+        }
+
+        Address newAddress = Address.createAddress(dto.getPostCode(), dto.getRoadAddress(), dto.getDetailAddress());
+        member.updateMemberInfo(dto.getUserId(), bCryptPasswordEncoder.encode(dto.getPassword()), dto.getName(),
+                dto.getNickname(), dto.getPhone(), newAddress);
+    }
+
+    /** oAuth 회원 정보 수정 */
+    @Transactional
+    public void oauthUpdateMemberInfo(Long memberId, MemberUpdateDto dto) {
+        Member member = validationService.validateMemberById(memberId);
+        if (memberRepository.existsByUserIdAndIdNot(member.getUserId(), memberId)) {
+            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
+        }
+
+        if (memberRepository.existsByNicknameAndIdNot(dto.getNickname(), memberId)) {
+            throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+        }
+
+        Address newAddress = Address.createAddress(dto.getPostCode(), dto.getRoadAddress(), dto.getDetailAddress());
+        member.oauthUpdateMemberInfo(dto.getName(), dto.getNickname(), dto.getPhone(), newAddress);
     }
 
     /** 회원 계정 상태 수정 (공개/비공개) */
@@ -91,6 +115,11 @@ public class MemberService {
         String roadAddress = null;
         String detailAddress = null;
 
+        String memberProfileImg = null;
+        if (findMember.getMemberProfileImg() != null) {
+            memberProfileImg = findMember.getMemberProfileImg().getImgUrl();
+        }
+
         if (findMember.getAddress() != null) {
             postCode = findMember.getAddress().getPostCode();
             roadAddress = findMember.getAddress().getRoadAddress();
@@ -98,9 +127,9 @@ public class MemberService {
         }
 
         return MemberResponseDto.createDto(findMember.getId(), findMember.getName(), findMember.getNickname(),
-                findMember.getEmail(), phone, postCode,
+                findMember.getIntroduction(), memberProfileImg, findMember.getEmail(), phone, postCode,
                 roadAddress, detailAddress, findMember.getGrade().name(), findMember.getPointGrade().name(),
-                findMember.getPoints(), findMember.getPayment());
+                findMember.getProvider().name(), findMember.getPoints(),  findMember.getPayment());
     }
 
     /** 회원의 게시물 조회 (프로필 비공개 시 팔로우 해야만 조회 가능) */

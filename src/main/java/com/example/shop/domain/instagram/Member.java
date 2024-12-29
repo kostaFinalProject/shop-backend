@@ -123,10 +123,19 @@ public class Member extends BaseEntity {
     }
 
     /** 회원 정보 수정 */
-    public void updateMemberInfo(String name, String nickname, String email, String phone, Address address) {
+    public void updateMemberInfo(String userId, String password, String name, String nickname, String phone, Address address) {
+        this.userId = userId;
+        this.password = password;
         this.name = name;
         this.nickname = nickname;
-        this.email = email;
+        this.phone = phone;
+        this.address = address;
+    }
+
+    /** Oauth 회원 정보 수정 */
+    public void oauthUpdateMemberInfo(String name, String nickname, String phone, Address address) {
+        this.name = name;
+        this.nickname = nickname;
         this.phone = phone;
         this.address = address;
     }
