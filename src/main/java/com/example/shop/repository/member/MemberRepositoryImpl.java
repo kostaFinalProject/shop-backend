@@ -200,7 +200,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         List<ArticleCollection> articleCollections = queryFactory.selectFrom(articleCollection)
                 .join(articleCollection.member, member).fetchJoin()
                 .join(articleCollection.article, article).fetchJoin()
-                .where(article.member.id.eq(memberId)
+                .where(articleCollection.member.id.eq(memberId)
                         .and(article.articleStatus.eq(ArticleStatus.ACTIVE)
                                 .and(article.member.id.notIn(excludeMembersId))
                                 .and(article.member.accountStatus.eq(AccountStatus.PUBLIC)
@@ -213,7 +213,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(articleCollection.count())
                 .from(articleCollection)
-                .where(article.member.id.eq(memberId)
+                .where(articleCollection.member.id.eq(memberId)
                         .and(article.articleStatus.eq(ArticleStatus.ACTIVE)
                                 .and(article.member.id.notIn(excludeMembersId))
                                 .and(article.member.accountStatus.eq(AccountStatus.PUBLIC)
