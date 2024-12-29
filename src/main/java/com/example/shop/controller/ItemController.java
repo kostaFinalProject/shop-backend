@@ -39,10 +39,11 @@ public class ItemController {
     public ResponseEntity<?> searchItems(@RequestParam(value = "category", required = false) String category,
                                          @RequestParam(value = "keyword", required = false) String keyword,
                                          @RequestParam(value = "page", defaultValue = "0") int page,
-                                         @RequestParam(value = "size", defaultValue = "20") int size) {
+                                         @RequestParam(value = "size", defaultValue = "20") int size,
+                                         @RequestParam(value = "sort", defaultValue = "newest") String sort) {
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(itemService.getSearchItem(category, keyword, pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getSearchItem(category, keyword, sort, pageable));
     }
 
     @PublicApi

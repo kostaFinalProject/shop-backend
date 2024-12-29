@@ -100,8 +100,8 @@ public class ItemService {
 
     /** 상품 통합 조회 */
     @Transactional(readOnly = true)
-    public Page<ItemSummaryResponseDto> getSearchItem(String category, String keyword, Pageable pageable) {
-        Page<Item> items = itemRepository.searchItems(category, keyword, pageable);
+    public Page<ItemSummaryResponseDto> getSearchItem(String category, String keyword, String condition, Pageable pageable) {
+        Page<Item> items = itemRepository.searchItems(category, keyword, condition, pageable);
 
         List<ItemSummaryResponseDto> dtos = items.stream()
                 .map(item -> {

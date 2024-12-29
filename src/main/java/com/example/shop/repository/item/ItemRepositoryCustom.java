@@ -10,5 +10,5 @@ public interface ItemRepositoryCustom {
     Optional<Item> findByItemId(Long id);
     boolean existsNameInCategory(String category, String name);
     boolean existsNameInCategoryExceptMe(String category, String name, Long id);
-    Page<Item> searchItems(String category, String keyword, Pageable pageable);
+    Page<Item> searchItems(String category, String keyword, String condition, Pageable pageable);
 }

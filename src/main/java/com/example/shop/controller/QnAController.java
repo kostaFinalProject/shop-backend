@@ -101,7 +101,7 @@ public class QnAController {
     @PublicApi
     @GetMapping
     public ResponseEntity<?> getAllQuestion(@RequestParam(value = "page", defaultValue = "0") int page,
-                                            @RequestParam(value = "size", defaultValue = "5") int size) {
+                                            @RequestParam(value = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(qnAService.getQnAQuestion(pageable));
     }

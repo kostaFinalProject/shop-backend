@@ -2,7 +2,11 @@ package com.example.shop.repository.item;
 
 import com.example.shop.domain.shop.Item;
 import com.example.shop.domain.shop.ItemStatus;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +17,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.shop.domain.shop.QDiscount.discount;
 import static com.example.shop.domain.shop.QItem.item;
 import static com.example.shop.domain.shop.QItemCategory.itemCategory;
 
@@ -54,26 +59,55 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     }
 
     @Override
-    public Page<Item> searchItems(String category, String keyword, Pageable pageable) {
+    public Page<Item> searchItems(String category, String keyword, String sortCondition, Pageable pageable) {
         BooleanExpression keywordCondition = hasKeyword(keyword);
         BooleanExpression categoryCondition = hasCategory(category);
         BooleanExpression commonCondition = item.itemStatus.eq(ItemStatus.ACTIVE)
                 .or(item.itemStatus.eq(ItemStatus.SOLD_OUT));
 
-        List<Item> content = queryFactory.selectFrom(item)
-                .where(combineConditions(commonCondition,keywordCondition, categoryCondition))
-                .orderBy(item.createAt.desc())
+        JPQLQuery<Tuple> query = queryFactory.select(item, discount)
+                .from(item)
+                .leftJoin(discount).on(item.id.eq(discount.item.id));
+
+        OrderSpecifier<?> orderSpecifier = getOrderSpecifier(sortCondition);
+
+        List<Item> content = query.select(item)
+                .where(combineConditions(commonCondition, keywordCondition, categoryCondition))
+                .orderBy(orderSpecifier)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
+
         JPAQuery<Long> countQuery = queryFactory.select(item.count())
                 .from(item)
-                .where(combineConditions(commonCondition,keywordCondition, categoryCondition));
+                .where(combineConditions(commonCondition, keywordCondition, categoryCondition));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
+    private OrderSpecifier<?> getOrderSpecifier(String sortCondition) {
+        if ("newest".equals(sortCondition)) {
+            return item.createAt.desc();
+        } else if ("highest".equals(sortCondition)) {
+            return new CaseBuilder()
+                    .when(discount.isNotNull()).then(discount.discountPrice)
+                    .otherwise(item.price)
+                    .desc();
+        } else if ("lowest".equals(sortCondition)) {
+            return new CaseBuilder()
+                    .when(discount.isNotNull()).then(discount.discountPrice)
+                    .otherwise(item.price)
+                    .asc();
+        } else if ("discount".equals(sortCondition)) {
+            return new CaseBuilder()
+                    .when(discount.isNotNull()).then(discount.discountPercent)
+                    .otherwise(0)
+                    .desc();
+        }
+
+        return item.createAt.desc();
+    }
     private BooleanExpression hasKeyword(String keyword) {
         return (keyword == null || keyword.isEmpty()) ? null : item.name.containsIgnoreCase(keyword);
     }
